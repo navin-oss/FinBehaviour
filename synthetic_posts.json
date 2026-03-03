@@ -1,0 +1,452 @@
+[
+  {
+    "text": "Portfolio update: Added 500 worth ₹NPS Tier-I",
+    "true_label": "Investment",
+    "timestamp": "2026-02-13T23:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Options trading: Made ₹leveraged crypto today. Feels like gambling but profitable?",
+    "true_label": "Risk",
+    "timestamp": "2026-02-05T23:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Finally got 500 on Flipkart sale - saved ₹Fossil watch!",
+    "true_label": "Spending",
+    "timestamp": "2026-02-16T17:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Reached ₹1000 in my child education corpus savings goal! 🎯",
+    "true_label": "Savings",
+    "timestamp": "2026-02-25T09:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Emergency fund updated: ₹retirement fund saved - 6 months covered ✅",
+    "true_label": "Savings",
+    "timestamp": "2026-02-21T08:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Home loan interest rate dropped to laptop% - refinancing!",
+    "true_label": "Loan",
+    "timestamp": "2026-02-22T18:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Learning about 75000 investing. Small start: ₹Axis long term equity",
+    "true_label": "Investment",
+    "timestamp": "2026-02-01T19:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Invested ₹5000 in Axis long term equity today 📈",
+    "true_label": "Investment",
+    "timestamp": "2026-02-20T10:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Just spent ₹10000 on Zara outfit - worth it!",
+    "true_label": "Spending",
+    "timestamp": "2026-02-09T09:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Transferred ₹SBI FD to savings account 💰",
+    "true_label": "Savings",
+    "timestamp": "2026-02-05T03:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "No-spend challenge day 10000: saved ₹emergency fund already!",
+    "true_label": "Savings",
+    "timestamp": "2026-02-22T22:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Bought Sony WH-1000XM5 today! 😍",
+    "true_label": "Spending",
+    "timestamp": "2026-02-23T17:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Rebalanced portfolio: Shifted ₹50000 to Gold ETF",
+    "true_label": "Investment",
+    "timestamp": "2026-02-09T07:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Just spent ₹10000 on Fossil watch - worth it!",
+    "true_label": "Spending",
+    "timestamp": "2026-02-23T09:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "New Sony WH-1000XM5 arrived! Unboxing soon 📦",
+    "true_label": "Spending",
+    "timestamp": "2026-02-16T22:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Bought Fossil watch today! 😍",
+    "true_label": "Spending",
+    "timestamp": "2026-02-05T05:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Put ₹10000 in Dream11 without research. YOLO! 🎲",
+    "true_label": "Risk",
+    "timestamp": "2026-02-25T21:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "New PS5 arrived! Unboxing soon 📦",
+    "true_label": "Spending",
+    "timestamp": "2026-02-05T10:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Auto-debit set: ₹SBI FD to FD every month",
+    "true_label": "Savings",
+    "timestamp": "2026-02-04T18:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Applied for personal loan. Fingers crossed 🤞",
+    "true_label": "Loan",
+    "timestamp": "2026-02-10T01:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Reached ₹15000 in my child education corpus savings goal! 🎯",
+    "true_label": "Savings",
+    "timestamp": "2026-02-26T19:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Pre-approved for 10000 loan of ₹wedding expenses. Tempting...",
+    "true_label": "Loan",
+    "timestamp": "2026-02-06T08:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Home loan interest rate dropped to Honda Activa% - refinancing!",
+    "true_label": "Loan",
+    "timestamp": "2026-02-11T10:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Saved ₹200000 this month! Goal: ₹child education corpus by Diwali",
+    "true_label": "Savings",
+    "timestamp": "2026-02-03T23:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Transferred ₹SBI FD to savings account 💰",
+    "true_label": "Savings",
+    "timestamp": "2026-02-25T18:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Cut expenses, saved ₹house down payment extra this week",
+    "true_label": "Savings",
+    "timestamp": "2026-02-11T22:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Dividend received ₹15000 from SBI Bluechip fund! Passive income 💪",
+    "true_label": "Investment",
+    "timestamp": "2026-02-27T04:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Learning about 75000 investing. Small start: ₹Nifty 50 index fund",
+    "true_label": "Investment",
+    "timestamp": "2026-01-30T03:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Fantasy league winnings: ₹Shiba Inu! Trying my luck again",
+    "true_label": "Risk",
+    "timestamp": "2026-02-10T02:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Home loan interest rate dropped to personal emergency% - refinancing!",
+    "true_label": "Loan",
+    "timestamp": "2026-02-02T04:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Saved ₹10000 this month! Goal: ₹Goa trip fund by Diwali",
+    "true_label": "Savings",
+    "timestamp": "2026-02-04T10:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Portfolio update: Added 200000 worth ₹HDFC Mid-Cap",
+    "true_label": "Investment",
+    "timestamp": "2026-02-26T09:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Lost ₹10000 in intraday options trading... lesson learned 😅",
+    "true_label": "Risk",
+    "timestamp": "2026-01-31T09:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Started SIP: ₹50000/month in SBI Bluechip fund - future me will thank me",
+    "true_label": "Investment",
+    "timestamp": "2026-02-04T17:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Borrowed ₹500 to invest in intraday options. High risk, high reward?",
+    "true_label": "Risk",
+    "timestamp": "2026-02-15T06:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "No-spend challenge day 25000: saved ₹emergency fund already!",
+    "true_label": "Savings",
+    "timestamp": "2026-02-06T19:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Treated myself to iPhone 15 after promotion! 🎉",
+    "true_label": "Spending",
+    "timestamp": "2026-02-02T00:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "All in on lottery scratch cards crypto! 🚀 To the moon!",
+    "true_label": "Risk",
+    "timestamp": "2026-02-03T01:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Home loan interest rate dropped to laptop% - refinancing!",
+    "true_label": "Loan",
+    "timestamp": "2026-02-16T02:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Finally got 15000 on Flipkart sale - saved ₹Nike Air Max!",
+    "true_label": "Spending",
+    "timestamp": "2026-02-20T02:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Pre-approved for 1000 loan of ₹Honda Activa. Tempting...",
+    "true_label": "Loan",
+    "timestamp": "2026-02-19T21:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Pre-approved for 50000 loan of ₹wedding expenses. Tempting...",
+    "true_label": "Loan",
+    "timestamp": "2026-02-17T10:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Cut expenses, saved ₹emergency fund extra this week",
+    "true_label": "Savings",
+    "timestamp": "2026-02-05T19:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Closed my Honda Activa loan today! Freedom feels amazing 🙌",
+    "true_label": "Loan",
+    "timestamp": "2026-02-24T10:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "New Nike Air Max arrived! Unboxing soon 📦",
+    "true_label": "Spending",
+    "timestamp": "2026-02-23T20:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Emergency fund updated: ₹SBI FD saved - 6 months covered ✅",
+    "true_label": "Savings",
+    "timestamp": "2026-02-11T06:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Applied for personal loan. Fingers crossed 🤞",
+    "true_label": "Loan",
+    "timestamp": "2026-02-04T08:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Started SIP: ₹25000/month in Sovereign Gold Bond - future me will thank me",
+    "true_label": "Investment",
+    "timestamp": "2026-02-21T19:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "EMI started for my new 10000 - monthly ₹Sony WH-1000XM5",
+    "true_label": "Spending",
+    "timestamp": "2026-02-10T07:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Pre-approved for 15000 loan of ₹1BHK flat. Tempting...",
+    "true_label": "Loan",
+    "timestamp": "2026-01-29T00:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Rebalanced portfolio: Shifted ₹2500 to SBI Bluechip fund",
+    "true_label": "Investment",
+    "timestamp": "2026-02-08T02:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Put ₹10000 in leveraged crypto without research. YOLO! 🎲",
+    "true_label": "Risk",
+    "timestamp": "2026-02-18T06:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "New Zara outfit arrived! Unboxing soon 📦",
+    "true_label": "Spending",
+    "timestamp": "2026-02-13T01:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Education loan EMI ₹1000 started for Honda Activa",
+    "true_label": "Loan",
+    "timestamp": "2026-01-30T09:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Education loan EMI ₹75000 started for Honda Activa",
+    "true_label": "Loan",
+    "timestamp": "2026-01-31T20:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Just spent ₹10000 on Sony WH-1000XM5 - worth it!",
+    "true_label": "Spending",
+    "timestamp": "2026-02-26T22:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Fantasy league winnings: ₹lottery scratch cards! Trying my luck again",
+    "true_label": "Risk",
+    "timestamp": "2026-02-11T01:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Learning about 100000 investing. Small start: ₹Axis long term equity",
+    "true_label": "Investment",
+    "timestamp": "2026-02-01T04:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Options trading: Made ₹penny stocks today. Feels like gambling but profitable?",
+    "true_label": "Risk",
+    "timestamp": "2026-02-11T18:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Finally got 5000 on Flipkart sale - saved ₹Zara outfit!",
+    "true_label": "Spending",
+    "timestamp": "2026-02-07T10:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Dividend received ₹75000 from HDFC Mid-Cap! Passive income 💪",
+    "true_label": "Investment",
+    "timestamp": "2026-02-10T22:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "All in on intraday options crypto! 🚀 To the moon!",
+    "true_label": "Risk",
+    "timestamp": "2026-02-20T21:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Leveraged ₹200000 on intraday options futures. Let's see what happens...",
+    "true_label": "Risk",
+    "timestamp": "2026-02-09T17:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Portfolio update: Added 100000 worth ₹SBI Bluechip fund",
+    "true_label": "Investment",
+    "timestamp": "2026-02-03T19:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Leveraged ₹500 on leveraged crypto futures. Let's see what happens...",
+    "true_label": "Risk",
+    "timestamp": "2026-02-09T10:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Just spent ₹75000 on Fossil watch - worth it!",
+    "true_label": "Spending",
+    "timestamp": "2026-02-16T02:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Closed my Honda Activa loan today! Freedom feels amazing 🙌",
+    "true_label": "Loan",
+    "timestamp": "2026-02-04T23:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Pre-approved for 50000 loan of ₹wedding expenses. Tempting...",
+    "true_label": "Loan",
+    "timestamp": "2026-02-14T04:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Options trading: Made ₹Dream11 today. Feels like gambling but profitable?",
+    "true_label": "Risk",
+    "timestamp": "2026-02-04T18:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Put ₹100000 in Dream11 without research. YOLO! 🎲",
+    "true_label": "Risk",
+    "timestamp": "2026-02-09T18:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Saved ₹15000 this month! Goal: ₹retirement fund by Diwali",
+    "true_label": "Savings",
+    "timestamp": "2026-02-22T07:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Rebalanced portfolio: Shifted ₹1000 to Gold ETF",
+    "true_label": "Investment",
+    "timestamp": "2026-02-15T02:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Dividend received ₹500 from Nifty 50 index fund! Passive income 💪",
+    "true_label": "Investment",
+    "timestamp": "2026-02-27T01:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Fantasy league winnings: ₹penny stocks! Trying my luck again",
+    "true_label": "Risk",
+    "timestamp": "2026-02-26T20:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Cut expenses, saved ₹emergency fund extra this week",
+    "true_label": "Savings",
+    "timestamp": "2026-01-30T07:17:48.263814",
+    "source": "synthetic_generator_v2"
+  }
+]
