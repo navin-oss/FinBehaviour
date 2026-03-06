@@ -448,5 +448,77 @@
     "true_label": "Savings",
     "timestamp": "2026-01-30T07:17:48.263814",
     "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Bet \u20b910000 on IPL match today! Let's go CSK!",
+    "true_label": "Gambling / Speculative",
+    "timestamp": "2026-02-28T10:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Online casino deposit \u20b95000 - feeling lucky tonight",
+    "true_label": "Gambling / Speculative",
+    "timestamp": "2026-02-28T12:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Crypto leverage trade \u20b950000 on Binance futures",
+    "true_label": "Gambling / Speculative",
+    "timestamp": "2026-02-28T14:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Won \u20b92000 on Dream11 IPL fantasy league! Putting it all back in",
+    "true_label": "Gambling / Speculative",
+    "timestamp": "2026-02-28T16:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Bought lottery tickets worth \u20b91000 - jackpot is 5 crore!",
+    "true_label": "Gambling / Speculative",
+    "timestamp": "2026-02-28T18:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Lost \u20b925000 on poker night. Need to win it back tomorrow",
+    "true_label": "Gambling / Speculative",
+    "timestamp": "2026-02-28T20:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Placed \u20b915000 bet on cricket match. 10x odds!",
+    "true_label": "Gambling / Speculative",
+    "timestamp": "2026-02-28T22:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Margin trading \u20b9100000 on penny stocks. High risk high reward",
+    "true_label": "Gambling / Speculative",
+    "timestamp": "2026-03-01T10:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Deposited \u20b98000 on Rummy Circle. Easy money strategy!",
+    "true_label": "Gambling / Speculative",
+    "timestamp": "2026-03-01T12:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "All in on meme coin trade! \u20b930000 in Dogecoin futures",
+    "true_label": "Gambling / Speculative",
+    "timestamp": "2026-03-01T14:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Sports betting app withdrawal \u20b93000. Lost \u20b912000 total this month",
+    "true_label": "Gambling / Speculative",
+    "timestamp": "2026-03-01T16:17:48.263814",
+    "source": "synthetic_generator_v2"
+  },
+  {
+    "text": "Invested \u20b920000 in speculative NFT drops",
+    "true_label": "Gambling / Speculative",
+    "timestamp": "2026-03-01T18:17:48.263814",
+    "source": "synthetic_generator_v2"
   }
 ]

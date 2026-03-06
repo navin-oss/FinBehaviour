@@ -200,6 +200,12 @@ if 'analysis_scores' not in st.session_state:
     st.session_state.analysis_scores = None
 if 'analysis_history' not in st.session_state:
     st.session_state.analysis_history = []
+if 'live_feed_running' not in st.session_state:
+    st.session_state.live_feed_running = False
+if 'live_feed_posts' not in st.session_state:
+    st.session_state.live_feed_posts = []
+if 'live_feed_risk' not in st.session_state:
+    st.session_state.live_feed_risk = 0
 
 
 # --- PREPROCESSING ---
@@ -253,9 +259,9 @@ def load_sentiment_model():
 # --- SCORING LOGIC (ENHANCED) ---
 def calculate_scores(classifications):
     """Enhanced scoring with confidence weighting and amount extraction"""
-    scores = {"Spending": 0, "Investment": 0, "Loan": 0, "Savings": 0, "Risk": 0}
-    weighted_scores = {"Spending": 0, "Investment": 0, "Loan": 0, "Savings": 0, "Risk": 0}
-    total_amount = {"Spending": 0, "Investment": 0, "Loan": 0, "Savings": 0, "Risk": 0}
+    scores = {"Spending": 0, "Investment": 0, "Loan": 0, "Savings": 0, "Risk": 0, "Gambling / Speculative": 0}
+    weighted_scores = {"Spending": 0, "Investment": 0, "Loan": 0, "Savings": 0, "Risk": 0, "Gambling / Speculative": 0}
+    total_amount = {"Spending": 0, "Investment": 0, "Loan": 0, "Savings": 0, "Risk": 0, "Gambling / Speculative": 0}
     
     confident_items = [c for c in classifications if c['label'] != "Uncertain"]
     
@@ -272,12 +278,17 @@ def calculate_scores(classifications):
     
     # Enhanced risk: weighted by confidence + amount factor
     amount_factor = 1.0
-    if total_amount['Spending'] + total_amount['Loan'] + total_amount['Risk'] > 0:
-        risky_amount = total_amount['Spending'] + total_amount['Loan'] + total_amount['Risk']
+    risky_amount = total_amount['Spending'] + total_amount['Loan'] + total_amount['Risk'] + total_amount['Gambling / Speculative']
+    if risky_amount > 0:
         safe_amount = total_amount['Investment'] + total_amount['Savings'] + 1
         amount_factor = min(risky_amount / safe_amount, 3.0)  # Cap at 3x
     
-    base_risk = (weighted_scores['Spending'] * 1 + weighted_scores['Loan'] * 1.5 + weighted_scores['Risk'] * 2)
+    base_risk = (
+        weighted_scores['Spending'] * 1 +
+        weighted_scores['Loan'] * 1.5 +
+        weighted_scores['Risk'] * 2 +
+        weighted_scores['Gambling / Speculative'] * 3.0  # Highest weight — gambling/fraud
+    )
     stabilizer = (weighted_scores['Investment'] * 1.2 + weighted_scores['Savings'] * 1.0)
     
     risk_score = ((base_risk - stabilizer * 0.5) / total) * 50 * (1 + amount_factor * 0.1)
@@ -361,7 +372,7 @@ def run_model_evaluation(classifier_model):
     except FileNotFoundError:
         return None, None, None
     
-    labels = ["Spending", "Investment", "Loan", "Savings", "Risk"]
+    labels = ["Spending", "Investment", "Loan", "Savings", "Risk", "Gambling / Speculative"]
     true_labels = []
     pred_labels = []
     
@@ -518,7 +529,7 @@ Started SIP of ₹2000/month in NPS"""
             st.warning("⚠️ Please enter at least one post.")
             return
         
-        labels = ["Spending", "Investment", "Loan", "Savings", "Risk"]
+        labels = ["Spending", "Investment", "Loan", "Savings", "Risk", "Gambling / Speculative"]
         results = []
         
         # Load classification model with visible feedback
@@ -630,7 +641,7 @@ Started SIP of ₹2000/month in NPS"""
         st.success(f"✅ Analysis Complete — {len(results)} posts in {elapsed:.1f}s ({elapsed/len(results)*1000:.0f}ms/post)")
         
         # --- TABS ---
-        tab1, tab2, tab3, tab4 = st.tabs(["📊 Dashboard", "📋 Details", "🔬 Model Eval", "📜 History"])
+        tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Dashboard", "📋 Details", "🔬 Model Eval", "📜 History", "📡 Live Feed"])
         
         with tab1:
             # Top Metrics
@@ -660,7 +671,7 @@ Started SIP of ₹2000/month in NPS"""
                 df = df[df['Count'] > 0]
                 if not df.empty:
                     fig = px.pie(df, values='Count', names='Category', hole=0.45,
-                                color_discrete_sequence=['#00d2ff', '#6c5ce7', '#fd79a8', '#00b894', '#e17055'])
+                                color_discrete_sequence=['#00d2ff', '#6c5ce7', '#fd79a8', '#00b894', '#e17055', '#ff3838'])
                     fig.update_layout(
                         showlegend=True, height=350,
                         margin=dict(t=10, b=10, l=10, r=10),
@@ -682,7 +693,7 @@ Started SIP of ₹2000/month in NPS"""
                 normalized = [v / max_val * 100 for v in values]
                 
                 # Add benchmark
-                benchmark = [50, 50, 30, 60, 20]  # "Ideal" profile
+                benchmark = [50, 50, 30, 60, 20, 5]  # "Ideal" profile
                 
                 fig_radar = go.Figure()
                 fig_radar.add_trace(go.Scatterpolar(
@@ -751,7 +762,7 @@ Started SIP of ₹2000/month in NPS"""
                 if not amount_data.empty:
                     fig_amt = px.bar(amount_data, x='Category', y='Amount',
                                     color='Category',
-                                    color_discrete_sequence=['#00d2ff', '#6c5ce7', '#fd79a8', '#00b894', '#e17055'])
+                                    color_discrete_sequence=['#00d2ff', '#6c5ce7', '#fd79a8', '#00b894', '#e17055', '#ff3838'])
                     fig_amt.update_layout(
                         showlegend=False, height=300,
                         margin=dict(t=10, b=10, l=10, r=10),
@@ -765,6 +776,73 @@ Started SIP of ₹2000/month in NPS"""
                 else:
                     st.info("No monetary amounts detected in posts.")
             
+            # --- BEHAVIORAL TIMELINE ---
+            st.markdown("---")
+            st.subheader("📅 Behavioral Timeline")
+            timeline_data = []
+            for idx, r in enumerate(results):
+                if r['Category'] != 'Uncertain':
+                    timeline_data.append({
+                        'Day': f'Day {idx + 1}',
+                        'DayNum': idx + 1,
+                        'Category': r['Category'],
+                        'Post': r['Post'][:50] + ('...' if len(r['Post']) > 50 else ''),
+                        'Confidence': r['Confidence']
+                    })
+            if timeline_data:
+                tl_df = pd.DataFrame(timeline_data)
+                category_risk_map = {
+                    'Investment': 10, 'Savings': 15, 'Spending': 50,
+                    'Loan': 60, 'Risk': 75, 'Gambling / Speculative': 95
+                }
+                tl_df['RiskLevel'] = tl_df['Category'].map(category_risk_map).fillna(50)
+                
+                # Cumulative risk trend
+                tl_df['CumulativeRisk'] = tl_df['RiskLevel'].expanding().mean()
+                
+                fig_timeline = go.Figure()
+                
+                # Scatter for individual posts
+                color_map = {
+                    'Spending': '#fd79a8', 'Investment': '#00b894', 'Loan': '#6c5ce7',
+                    'Savings': '#00d2ff', 'Risk': '#e17055', 'Gambling / Speculative': '#ff3838'
+                }
+                for cat in tl_df['Category'].unique():
+                    cat_data = tl_df[tl_df['Category'] == cat]
+                    fig_timeline.add_trace(go.Scatter(
+                        x=cat_data['DayNum'], y=cat_data['RiskLevel'],
+                        mode='markers+text', name=cat,
+                        marker=dict(size=14, color=color_map.get(cat, '#aaa'), symbol='circle',
+                                    line=dict(width=1, color='white')),
+                        text=cat_data['Category'],
+                        textposition='top center',
+                        textfont=dict(size=9, color='#a0a0c0'),
+                        hovertext=cat_data['Post'],
+                        hoverinfo='text+name'
+                    ))
+                
+                # Cumulative risk trendline
+                fig_timeline.add_trace(go.Scatter(
+                    x=tl_df['DayNum'], y=tl_df['CumulativeRisk'],
+                    mode='lines', name='Risk Trend',
+                    line=dict(color='#ffc107', width=2, dash='dot'),
+                    hoverinfo='y+name'
+                ))
+                
+                fig_timeline.update_layout(
+                    xaxis_title='Post Sequence', yaxis_title='Risk Level',
+                    height=350,
+                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                    font_color='#a0a0c0',
+                    xaxis=dict(gridcolor='rgba(255,255,255,0.05)'),
+                    yaxis=dict(gridcolor='rgba(255,255,255,0.05)', range=[0, 100]),
+                    legend=dict(font=dict(color='#e0e0e0'), orientation='h', yanchor='bottom', y=1.02)
+                )
+                st.plotly_chart(fig_timeline, use_container_width=True)
+                st.caption("_Each dot is a classified post. The dashed line shows cumulative risk trend — judges see pattern detection._")
+            else:
+                st.info("No confident classifications for timeline.")
+
             # Recommendations
             st.subheader("💡 AI-Powered Bank Recommendations")
             
@@ -822,6 +900,7 @@ Started SIP of ₹2000/month in NPS"""
                 | Spending | {scores['Spending']} | {weighted_scores['Spending']:.2f} | ×1.0 | +{weighted_scores['Spending']*1:.2f} |
                 | Loan | {scores['Loan']} | {weighted_scores['Loan']:.2f} | ×1.5 | +{weighted_scores['Loan']*1.5:.2f} |
                 | Risk | {scores['Risk']} | {weighted_scores['Risk']:.2f} | ×2.0 | +{weighted_scores['Risk']*2:.2f} |
+                | Gambling / Speculative | {scores['Gambling / Speculative']} | {weighted_scores['Gambling / Speculative']:.2f} | ×3.0 | +{weighted_scores['Gambling / Speculative']*3:.2f} |
                 | Investment | {scores['Investment']} | {weighted_scores['Investment']:.2f} | ×-0.6 | {-weighted_scores['Investment']*0.6:.2f} |
                 | Savings | {scores['Savings']} | {weighted_scores['Savings']:.2f} | ×-0.5 | {-weighted_scores['Savings']*0.5:.2f} |
                 
@@ -861,6 +940,84 @@ Started SIP of ₹2000/month in NPS"""
                 </div>
                 """, unsafe_allow_html=True)
 
+            # --- BANK DECISION ENGINE ---
+            st.markdown("---")
+            st.subheader("🏦 AI Credit Recommendation Engine")
+            
+            decision_confidence = max(0, 100 - uncertainty_rate)
+            
+            if risk_score <= 30:
+                decision_emoji = "✅"
+                decision_text = "Approved — Low Risk"
+                decision_color = "#00b894"
+                eligibility = "Eligible for Personal Loan (₹5L) • Premium Credit Card"
+                products = [
+                    ("💳", "Premium Credit Card", "₹5L limit, 3% cashback, lounge access"),
+                    ("🏠", "Home Loan Pre-approval", "Up to ₹50L at preferential rates"),
+                    ("📈", "Wealth Management", "Dedicated relationship manager"),
+                    ("🛡️", "Insurance Bundle", "Term + Health at group rates")
+                ]
+            elif risk_score <= 50:
+                decision_emoji = "✅"
+                decision_text = "Conditionally Approved — Moderate Risk"
+                decision_color = "#00d2ff"
+                eligibility = "Eligible for Micro Loan (₹50k) • Low-limit Credit Card"
+                products = [
+                    ("💳", "Low-limit Credit Card", "₹25k limit, build credit history"),
+                    ("📊", "SIP Starter Plan", "₹500/month auto-invest in index funds"),
+                    ("🎓", "Financial Literacy Program", "Free budgeting course + certification"),
+                    ("💰", "Micro Savings Account", "2x interest on first ₹50k")
+                ]
+            elif risk_score <= 70:
+                decision_emoji = "⚠️"
+                decision_text = "Under Review — Elevated Risk"
+                decision_color = "#ffc107"
+                eligibility = "Conditional approval with 3-month monitoring period"
+                products = [
+                    ("🔒", "Secured Credit Card", "Deposit-backed, ₹10k limit"),
+                    ("📚", "Financial Coaching", "1-on-1 sessions with advisor"),
+                    ("💰", "Auto-Savings Plan", "₹500/week mandatory savings"),
+                    ("🔍", "3-Month Review", "Re-evaluate after monitoring")
+                ]
+            else:
+                decision_emoji = "❌"
+                decision_text = "Declined — High Risk"
+                decision_color = "#ff3838"
+                eligibility = "Not eligible at this time. Alternative programs recommended."
+                products = [
+                    ("🎓", "Financial Literacy Program", "Mandatory 4-week course"),
+                    ("💰", "Guided Savings Program", "₹200/day auto-debit to savings"),
+                    ("🔄", "Debt Counseling", "Free session with certified counselor"),
+                    ("📅", "6-Month Re-application", "Apply again after program completion")
+                ]
+            
+            # Decision Card
+            st.markdown(f"""
+            <div style="background: rgba(255,255,255,0.04); border: 2px solid {decision_color}; border-radius: 16px; padding: 28px; margin: 10px 0;">
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                    <span style="font-size: 2.5rem;">{decision_emoji}</span>
+                    <div>
+                        <h3 style="color: {decision_color}; margin: 0;">{decision_text}</h3>
+                        <p style="color: #a0a0c0; margin: 4px 0 0 0;">Risk Score: <b style="color: white;">{int(risk_score)}/100</b> • Decision Confidence: <b style="color: white;">{decision_confidence:.0f}%</b></p>
+                    </div>
+                </div>
+                <p style="color: #e0e0e0; font-size: 1.05rem; margin: 0;">📋 {eligibility}</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Product Recommendations
+            st.markdown("**Recommended Products:**")
+            prod_cols = st.columns(4)
+            for col, (icon, title, desc) in zip(prod_cols, products):
+                with col:
+                    st.markdown(f"""
+                    <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; text-align: center; min-height: 140px;">
+                        <div style="font-size: 2rem; margin-bottom: 8px;">{icon}</div>
+                        <div style="color: #00d2ff; font-weight: 700; font-size: 0.9rem;">{title}</div>
+                        <div style="color: #a0a0c0; font-size: 0.78rem; margin-top: 6px;">{desc}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
             # Download Report
             st.markdown("---")
             dl_col1, dl_col2, dl_col3 = st.columns([1, 1, 1])
@@ -886,7 +1043,7 @@ Started SIP of ₹2000/month in NPS"""
             
             # Expandable details
             for idx, row in results_df.iterrows():
-                emoji_map = {"Spending": "💸", "Investment": "📈", "Loan": "🏦", "Savings": "💰", "Risk": "⚠️", "Uncertain": "❓"}
+                emoji_map = {"Spending": "💸", "Investment": "📈", "Loan": "🏦", "Savings": "💰", "Risk": "⚠️", "Gambling / Speculative": "🎰", "Uncertain": "❓"}
                 emoji = emoji_map.get(row['Category'], "📝")
                 
                 with st.expander(f"{emoji} {row['Post'][:70]}{'...' if len(row['Post'])>70 else ''}"):
@@ -897,7 +1054,7 @@ Started SIP of ₹2000/month in NPS"""
                     d4.metric("Amount", f"₹{row['Amount']:,.0f}" if row['Amount'] > 0 else "—")
                     
                     # --- HUMAN-IN-THE-LOOP FLAGGING (Add-On #2) ---
-                    if row['Category'] == 'Risk' or row['Confidence'] < 0.6:
+                    if row['Category'] in ['Risk', 'Gambling / Speculative'] or row['Confidence'] < 0.6:
                         flag_key = f"flag_{idx}_{row['Post'][:20]}"
                         if st.button("🚩 Flag for Manual Review", key=flag_key):
                             st.success("✅ Flagged for Loan Officer Review — alert sent to CRM")
@@ -998,6 +1155,103 @@ Started SIP of ₹2000/month in NPS"""
             else:
                 st.info("No analysis history yet. Run an analysis to see trends.")
         
+        # --- TAB 5: LIVE FEED SIMULATION ---
+        with tab5:
+            st.subheader("📡 Live Social Feed Simulation")
+            st.caption("_Demo Mode — Simulates real-time social media post analysis like a live AI pipeline_")
+            
+            demo_feed_posts = [
+                ("I spent ₹12,000 on a new phone 😭", "Spending", "Negative", 6),
+                ("Just invested ₹5000 in mutual funds 📈", "Investment", "Positive", -3),
+                ("Borrowed ₹20000 from friend for rent", "Loan", "Negative", 8),
+                ("Spent ₹8000 on shopping spree! 🛍️", "Spending", "Positive", 5),
+                ("Saving ₹3000 every month now 💪", "Savings", "Positive", -4),
+                ("Thinking to take personal loan 🤔", "Loan", "Neutral", 7),
+                ("Bet ₹10,000 on IPL match! 🏐", "Gambling / Speculative", "Negative", 25),
+                ("Started SIP of ₹2000/month today", "Investment", "Positive", -5),
+                ("Online casino deposit ₹5000 🎰", "Gambling / Speculative", "Negative", 25),
+                ("Emergency fund reached ₹1 lakh! 🎉", "Savings", "Positive", -6),
+                ("Crypto leverage trade ₹50000 🚀", "Gambling / Speculative", "Negative", 20),
+                ("Paid all credit card bills on time ✅", "Savings", "Positive", -3),
+                ("Bought PS5 on EMI ₹4000/month", "Spending", "Neutral", 4),
+                ("Lost ₹15000 in options trading 😅", "Risk", "Negative", 12),
+                ("Rebalanced portfolio to debt funds", "Investment", "Positive", -4),
+            ]
+            
+            feed_col1, feed_col2 = st.columns([2, 1])
+            
+            with feed_col1:
+                num_posts = st.slider("Number of posts to stream", 3, 15, 8, key="feed_slider")
+                
+                if st.button("▶️ Start Live Feed", type="primary", use_container_width=True):
+                    feed_container = st.container()
+                    score_display = feed_col2.empty()
+                    running_risk = 50  # Start at neutral
+                    
+                    import random as rnd
+                    indices = rnd.sample(range(len(demo_feed_posts)), min(num_posts, len(demo_feed_posts)))
+                    
+                    for step, idx in enumerate(indices):
+                        post_text, category, sentiment, risk_impact = demo_feed_posts[idx]
+                        running_risk = max(0, min(100, running_risk + risk_impact))
+                        
+                        with feed_container:
+                            # Post card
+                            risk_color = "#ff3838" if risk_impact > 0 else "#00b894"
+                            cat_colors = {
+                                'Spending': '#fd79a8', 'Investment': '#00b894', 'Loan': '#6c5ce7',
+                                'Savings': '#00d2ff', 'Risk': '#e17055', 'Gambling / Speculative': '#ff3838'
+                            }
+                            cat_color = cat_colors.get(category, '#aaa')
+                            
+                            st.markdown(f"""
+                            <div style="background: rgba(255,255,255,0.04); border-left: 3px solid {cat_color}; border-radius: 8px; padding: 16px; margin: 8px 0;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                    <div>
+                                        <span style="background: rgba(0,210,255,0.15); color: #00d2ff; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">NEW POST</span>
+                                        <p style="color: #e0e0e0; font-size: 1rem; margin: 8px 0 12px 0;">“{post_text}”</p>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                                    <span style="color: #a0a0c0; font-size: 0.85rem;">Category → <b style="color: {cat_color};">{category}</b></span>
+                                    <span style="color: #a0a0c0; font-size: 0.85rem;">Sentiment → <b>{sentiment}</b></span>
+                                    <span style="color: #a0a0c0; font-size: 0.85rem;">Risk Impact → <b style="color: {risk_color};">{"+" if risk_impact > 0 else ""}{risk_impact}</b></span>
+                                </div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        # Update score display
+                        risk_emoji = "🔴" if running_risk > 70 else "🟢" if running_risk < 30 else "🟡"
+                        with score_display.container():
+                            st.metric("🎯 Live Risk Score", f"{running_risk}/100")
+                            st.progress(running_risk / 100)
+                            level = "HIGH" if running_risk > 70 else "LOW" if running_risk < 30 else "MEDIUM"
+                            st.markdown(f"**{risk_emoji} {level} RISK**")
+                            st.caption(f"Posts analyzed: {step + 1}/{num_posts}")
+                        
+                        time.sleep(1.5)
+                    
+                    st.success(f"✅ Live Feed Complete — Final Risk Score: **{running_risk}/100**")
+                    st.balloons()
+                else:
+                    st.info("👆 Click **Start Live Feed** to simulate real-time social media post analysis with AI classification.")
+            
+            with feed_col2:
+                st.markdown("")
+                st.markdown("""
+                <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px;">
+                    <h4 style="color: #00d2ff; margin-top: 0;">How It Works</h4>
+                    <p style="color: #a0a0c0; font-size: 0.85rem; line-height: 1.6;">
+                        📡 Posts stream in real-time<br>
+                        🤖 AI classifies each post instantly<br>
+                        📊 Risk score updates live<br>
+                        🎰 Gambling/fraud posts cause major spikes<br>
+                        💰 Savings/investment posts reduce risk
+                    </p>
+                    <p style="color: #666; font-size: 0.75rem; margin-bottom: 0;">In production, this connects to social media APIs with user consent.</p>
+                </div>
+                """, unsafe_allow_html=True)
+        
         # Performance Metrics
         with st.expander("⚡ Performance Metrics"):
             perf1, perf2, perf3 = st.columns(3)
@@ -1075,8 +1329,10 @@ Started SIP of ₹2000/month in NPS"""
             ### 🎯 Features
             - **Zero-Shot NLP** — No training data needed
             - **Sentiment-Aware Scoring** — Emotional context matters
-            - **Amount Extraction** — ₹ values impact risk weight
-            - **Confidence Thresholds** — Filter uncertain predictions
+            - **📡 Live Feed Simulation** — Real-time AI pipeline demo
+            - **🎰 Gambling/Fraud Detection** — Speculative behavior flagging
+            - **🏦 Credit Decision Engine** — Bank-grade loan recommendations
+            - **📅 Behavioral Timeline** — Pattern detection over time
             - **Explainable AI** — See exactly why each score
             - **PDF Reports** — Download professional reports
             - **Model Evaluation** — Confusion matrix & F1 scores
