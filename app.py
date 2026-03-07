@@ -529,6 +529,217 @@ st.markdown("""
         transform: translateY(-3px);
         box-shadow: 0 8px 25px rgba(0, 210, 255, 0.08);
     }
+
+    /* ===== 1. HERO TITLE GLOW ===== */
+    @keyframes titleGlow {
+        0%, 100% { text-shadow: 0 0 20px rgba(0,210,255,0.3), 0 0 40px rgba(108,92,231,0.15); filter: brightness(1); }
+        50%      { text-shadow: 0 0 30px rgba(0,210,255,0.6), 0 0 60px rgba(108,92,231,0.3), 0 0 80px rgba(0,210,255,0.1); filter: brightness(1.1); }
+    }
+    .main-header {
+        animation: shimmer 4s linear infinite, titleGlow 4s ease-in-out infinite !important;
+    }
+
+    /* ===== 1b. TYPING ANIMATION FOR SUBTITLE ===== */
+    @keyframes typingReveal {
+        from { max-width: 0; }
+        to   { max-width: 800px; }
+    }
+    @keyframes blinkCursor {
+        0%, 100% { border-right-color: #00d2ff; }
+        50%      { border-right-color: transparent; }
+    }
+    .sub-header-typing {
+        color: #a0a0c0;
+        font-size: 1.05rem;
+        margin-top: 4px;
+        font-weight: 400;
+        letter-spacing: 0.3px;
+        overflow: hidden;
+        white-space: nowrap;
+        max-width: 0;
+        border-right: 2px solid #00d2ff;
+        animation: typingReveal 3s steps(50, end) 0.5s forwards, blinkCursor 0.8s step-end infinite;
+        display: inline-block;
+    }
+
+    /* ===== 2. PIPELINE FLOW ARROWS ===== */
+    .flow-container {
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+        justify-content: center;
+    }
+    .flow-arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #00d2ff;
+        font-size: 1.6rem;
+        padding: 0 2px;
+        animation: bounceArrow 1.5s ease-in-out infinite;
+        opacity: 0.6;
+        filter: drop-shadow(0 0 6px rgba(0,210,255,0.4));
+    }
+    .flow-step {
+        animation: fadeInUp 0.6s ease-out both, glowPulse 4s ease-in-out 2s infinite;
+    }
+    .flow-step:hover {
+        border-color: rgba(0, 210, 255, 0.5) !important;
+        box-shadow: 0 16px 40px rgba(0, 210, 255, 0.2), 0 0 0 1px rgba(0,210,255,0.3), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+    }
+    .flow-step:hover .icon {
+        transform: scale(1.3) translateY(-4px) !important;
+        filter: drop-shadow(0 4px 8px rgba(0,210,255,0.4));
+    }
+
+    /* ===== 3. ANIMATED RISK GAUGE ===== */
+    @keyframes fillGauge {
+        from { --gauge-angle: 0deg; }
+    }
+    .risk-gauge-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        animation: scaleIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+    .risk-gauge {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fillGauge 1.5s ease-out both;
+    }
+    .risk-gauge-inner {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: inset 0 2px 15px rgba(0,0,0,0.4);
+    }
+    .risk-gauge-score {
+        font-size: 2.4rem;
+        font-weight: 900;
+        font-family: 'Inter', sans-serif;
+        line-height: 1;
+    }
+    .risk-gauge-label {
+        font-size: 0.7rem;
+        color: #a0a0c0;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-top: 4px;
+        font-weight: 600;
+    }
+    .risk-gauge-level {
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-top: 10px;
+        letter-spacing: 0.5px;
+        padding: 4px 16px;
+        border-radius: 20px;
+    }
+
+    /* ===== 4. AI PROCESSING ANIMATION ===== */
+    @keyframes dotPulse {
+        0%   { content: ''; }
+        25%  { content: '.'; }
+        50%  { content: '..'; }
+        75%  { content: '...'; }
+        100% { content: ''; }
+    }
+    @keyframes iconSpin {
+        0%   { transform: scale(1) rotate(0deg); }
+        50%  { transform: scale(1.15) rotate(5deg); }
+        100% { transform: scale(1) rotate(0deg); }
+    }
+    .ai-stage {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 22px;
+        background: rgba(0, 210, 255, 0.04);
+        border: 1px solid rgba(0, 210, 255, 0.1);
+        border-radius: 12px;
+        margin: 8px 0;
+        animation: fadeInUp 0.4s ease-out both;
+        backdrop-filter: blur(10px);
+    }
+    .ai-stage-icon {
+        font-size: 1.5rem;
+        animation: iconSpin 1.5s ease-in-out infinite;
+    }
+    .ai-stage-text {
+        color: #e0e0e0;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+    .ai-stage-active {
+        border-color: rgba(0, 210, 255, 0.3);
+        background: rgba(0, 210, 255, 0.08);
+        box-shadow: 0 4px 20px rgba(0, 210, 255, 0.1);
+    }
+    .ai-stage-done {
+        border-color: rgba(0, 184, 148, 0.2);
+        opacity: 0.7;
+    }
+    .ai-stage-done .ai-stage-icon {
+        animation: none;
+    }
+
+    /* ===== 5. CONFIDENCE BARS ===== */
+    @keyframes barFill {
+        from { width: 0%; }
+    }
+    .confidence-bar-container {
+        margin: 8px 0;
+    }
+    .confidence-bar-label {
+        display: flex;
+        justify-content: space-between;
+        color: #a0a0c0;
+        font-size: 0.82rem;
+        margin-bottom: 4px;
+        font-weight: 500;
+    }
+    .confidence-bar-track {
+        height: 8px;
+        background: rgba(255,255,255,0.06);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    .confidence-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        animation: barFill 1.2s ease-out both;
+        box-shadow: 0 0 10px rgba(0,210,255,0.3);
+    }
+
+    /* ===== 6. RESULT REVEAL STAGGER ===== */
+    .reveal-section {
+        animation: fadeInUp 0.7s ease-out both;
+    }
+    .reveal-1 { animation-delay: 0.1s; }
+    .reveal-2 { animation-delay: 0.3s; }
+    .reveal-3 { animation-delay: 0.5s; }
+    .reveal-4 { animation-delay: 0.7s; }
+    .reveal-5 { animation-delay: 0.9s; }
+    .reveal-6 { animation-delay: 1.1s; }
+    .reveal-7 { animation-delay: 1.3s; }
+
+    .slide-up-card {
+        animation: fadeInUp 0.6s ease-out both;
+    }
+    .slide-up-card-1 { animation-delay: 0.8s; }
+    .slide-up-card-2 { animation-delay: 0.95s; }
+    .slide-up-card-3 { animation-delay: 1.1s; }
+    .slide-up-card-4 { animation-delay: 1.25s; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -802,11 +1013,13 @@ def main():
                 <img src="data:image/png;base64,{logo_b64}" class="logo-img" alt="FinBehavior AI logo">
                 <div>
                     <h1 class="main-header">FinBehavior AI</h1>
-                    <p class="sub-header">Social Behavioral Credit Intelligence Platform</p>
+                    <div class="sub-header-typing">Social Behavioral Credit Intelligence Platform</div>
                 </div>
             </div>
             ''', unsafe_allow_html=True)
         else:
+            st.markdown('<h1 class="main-header">FinBehavior AI</h1>', unsafe_allow_html=True)
+            st.markdown('<div class="sub-header-typing">Social Behavioral Credit Intelligence Platform</div>', unsafe_allow_html=True)
             st.markdown('<h1 class="main-header">FinBehavior AI</h1>', unsafe_allow_html=True)
             st.markdown('<p class="sub-header">Social Behavioral Credit Intelligence Platform</p>', unsafe_allow_html=True)
         
@@ -845,13 +1058,13 @@ def main():
             <img src="data:image/png;base64,{logo_b64}" class="logo-img" alt="FinBehavior AI logo">
             <div>
                 <h1 class="main-header">FinBehavior AI</h1>
-                <p class="sub-header">Social Behavioral Credit Intelligence Dashboard — Consent-Based & Privacy-First</p>
+                <div class="sub-header-typing">Social Behavioral Credit Intelligence Dashboard — Consent-Based & Privacy-First</div>
             </div>
         </div>
         ''', unsafe_allow_html=True)
     else:
         st.markdown('<h1 class="main-header">FinBehavior AI</h1>', unsafe_allow_html=True)
-        st.markdown('<p class="sub-header">Social Behavioral Credit Intelligence Dashboard — Consent-Based & Privacy-First</p>', unsafe_allow_html=True)
+        st.markdown('<div class="sub-header-typing">Social Behavioral Credit Intelligence Dashboard — Consent-Based & Privacy-First</div>', unsafe_allow_html=True)
 
     # --- SIDEBAR ---
     st.sidebar.markdown("## 📥 Input Data")
@@ -1074,23 +1287,32 @@ Started SIP of ₹2000/month in NPS"""
         
         # Progress UX
         progress_bar = st.progress(0)
-        status_text = st.empty()
+        status_container = st.empty()
         
         status_messages = [
-            "🔍 Parsing financial intent...",
-            "🧠 Running NLP classification...",
-            "📊 Computing behavior vectors...",
-            "⚡ Calculating risk metrics...",
-            "🎯 Generating recommendations..."
+            ("🔍", "Parsing financial intent..."),
+            ("🧠", "Running NLP classification..."),
+            ("📊", "Computing behavior vectors..."),
+            ("⚡", "Calculating risk metrics..."),
+            ("🎯", "Generating recommendations...")
         ]
         
         start_time = time.time()
         
-        with st.spinner('🤖 AI analysis in progress...'):
+        with st.spinner(''):
             for i, post in enumerate(posts):
-                # Status message rotation
+                # Status message UI with animation
                 msg_idx = min(i * len(status_messages) // len(posts), len(status_messages) - 1)
-                status_text.text(f"{status_messages[msg_idx]} ({i+1}/{len(posts)})")
+                icon, text = status_messages[msg_idx]
+                
+                status_html = f'''
+                <div class="ai-stage ai-stage-active">
+                    <div class="ai-stage-icon">{icon}</div>
+                    <div class="ai-stage-text">{text}</div>
+                    <div style="margin-left: auto; color: #00d2ff; font-weight: bold;">{int(((i+1)/len(posts))*100)}%</div>
+                </div>
+                '''
+                status_container.markdown(status_html, unsafe_allow_html=True)
                 
                 clean_post = preprocess_text(post)
                 amount = extract_amount(post)
@@ -1132,7 +1354,7 @@ Started SIP of ₹2000/month in NPS"""
         
         elapsed = time.time() - start_time
         progress_bar.empty()
-        status_text.empty()
+        status_container.empty()
         
         # Store in session state
         scores, risk_score, uncertainty_rate, weighted_scores, total_amounts = calculate_scores([
@@ -1175,13 +1397,35 @@ Started SIP of ₹2000/month in NPS"""
         
         with tab1:
             # Top Metrics
+            st.markdown('<div class="reveal-section reveal-1">', unsafe_allow_html=True)
             st.subheader("📊 Financial Behavior Summary")
-            col1, col2, col3, col4, col5 = st.columns(5)
+            col1, col2, col3, col4, col5 = st.columns([1.5, 1, 1, 1, 1])
             
             with col1:
-                risk_emoji = "🔴" if risk_score > 70 else "🟢" if risk_score < 30 else "🟡"
-                st.metric("Risk Score", f"{int(risk_score)}/100",
-                          delta=f"{risk_emoji} High" if risk_score > 70 else f"{risk_emoji} Low" if risk_score < 30 else f"{risk_emoji} Medium")
+                # --- ANIMATED RISK GAUGE ---
+                risk_color = "#ff3838" if risk_score > 70 else "#00b894" if risk_score < 30 else "#ffc107"
+                gauge_deg = int((risk_score / 100) * 360)
+                level = "HIGH RISK" if risk_score > 70 else "LOW RISK" if risk_score < 30 else "MED RISK"
+                
+                st.markdown(f'''
+                <style>
+                @keyframes fillCustomGauge {{
+                    from {{ background: conic-gradient(from 0deg, {risk_color} 0deg, rgba(255,255,255,0.05) 0deg); }}
+                    to   {{ background: conic-gradient(from 0deg, {risk_color} {gauge_deg}deg, rgba(255,255,255,0.05) {gauge_deg}deg); }}
+                }}
+                .risk-gauge-active {{ animation: fillCustomGauge 1.5s ease-out forwards; }}
+                </style>
+                <div class="risk-gauge-container">
+                    <div class="risk-gauge risk-gauge-active">
+                        <div class="risk-gauge-inner">
+                            <div class="risk-gauge-score" style="color: {risk_color};">{int(risk_score)}</div>
+                            <div class="risk-gauge-label">Score</div>
+                        </div>
+                    </div>
+                    <div class="risk-gauge-level" style="background: {risk_color}20; border: 1px solid {risk_color}50; color: {risk_color};">{level}</div>
+                </div>
+                ''', unsafe_allow_html=True)
+                
             with col2:
                 st.metric("💸 Spending", scores['Spending'])
             with col3:
@@ -1191,8 +1435,10 @@ Started SIP of ₹2000/month in NPS"""
             with col5:
                 st.metric("❓ Uncertain", f"{uncertainty_rate:.0f}%",
                           delta="Good" if uncertainty_rate < 20 else "Review needed")
+            st.markdown('</div>', unsafe_allow_html=True)
             
             # Charts
+            st.markdown('<div class="reveal-section reveal-2">', unsafe_allow_html=True)
             c1, c2 = st.columns(2)
             
             with c1:
@@ -1253,8 +1499,10 @@ Started SIP of ₹2000/month in NPS"""
                     legend=dict(font=dict(color='#e0e0e0'))
                 )
                 st.plotly_chart(fig_radar, use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
             
             # Risk Factors
+            st.markdown('<div class="reveal-section reveal-3">', unsafe_allow_html=True)
             c3, c4 = st.columns(2)
             
             with c3:
@@ -1305,8 +1553,10 @@ Started SIP of ₹2000/month in NPS"""
                     st.plotly_chart(fig_amt, use_container_width=True)
                 else:
                     st.info("No monetary amounts detected in posts.")
+            st.markdown('</div>', unsafe_allow_html=True)
             
             # --- BEHAVIORAL TIMELINE ---
+            st.markdown('<div class="reveal-section reveal-4">', unsafe_allow_html=True)
             st.markdown("---")
             st.subheader("📅 Behavioral Timeline")
             timeline_data = []
@@ -1372,8 +1622,10 @@ Started SIP of ₹2000/month in NPS"""
                 st.caption("_Each dot is a classified post. The dashed line shows cumulative risk trend — judges see pattern detection._")
             else:
                 st.info("No confident classifications for timeline.")
+            st.markdown('</div>', unsafe_allow_html=True)
 
             # Recommendations
+            st.markdown('<div class="reveal-section reveal-5">', unsafe_allow_html=True)
             st.subheader("💡 AI-Powered Bank Recommendations")
             
             if risk_score > 70:
@@ -1537,16 +1789,18 @@ Started SIP of ₹2000/month in NPS"""
             
             # Product Recommendations
             st.markdown("**Recommended Products:**")
+            st.markdown('<div style="display: flex; gap: 16px; margin-bottom: 24px;">', unsafe_allow_html=True)
             prod_cols = st.columns(4)
-            for col, (icon, title, desc) in zip(prod_cols, products):
+            for i, (col, (icon, title, desc)) in enumerate(zip(prod_cols, products)):
                 with col:
                     st.markdown(f"""
-                    <div class="product-card">
+                    <div class="product-card slide-up-card slide-up-card-{i+1}">
                         <div class="card-icon">{icon}</div>
                         <div style="color: #00d2ff; font-weight: 700; font-size: 0.9rem;">{title}</div>
                         <div style="color: #a0a0c0; font-size: 0.78rem; margin-top: 8px; line-height: 1.4;">{desc}</div>
                     </div>
                     """, unsafe_allow_html=True)
+            st.markdown('</div></div>', unsafe_allow_html=True)
 
             # Download Report
             st.markdown("---")
@@ -1591,17 +1845,16 @@ Started SIP of ₹2000/month in NPS"""
                             st.caption("_In production, this triggers an alert in the bank's Case Management System_")
                     
                     if row['All_Scores']:
-                        score_df = pd.DataFrame(list(row['All_Scores'].items()), columns=['Label', 'Score'])
-                        fig_bar = px.bar(score_df, x='Label', y='Score',
-                                        color='Score', color_continuous_scale='Viridis')
-                        fig_bar.update_layout(
-                            height=200, margin=dict(t=10, b=10, l=10, r=10),
-                            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                            font_color='#a0a0c0',
-                            xaxis=dict(gridcolor='rgba(255,255,255,0.05)'),
-                            yaxis=dict(gridcolor='rgba(255,255,255,0.05)')
-                        )
-                        st.plotly_chart(fig_bar, use_container_width=True, key=f"detail_bar_{idx}")
+                        st.markdown('<div class="confidence-bar-container">', unsafe_allow_html=True)
+                        for label, score in list(row['All_Scores'].items())[:3]:  # Top 3 scores
+                            color = "#00d2ff" if label == row['Category'] else "#a0a0c0"
+                            st.markdown(f'''
+                            <div class="confidence-bar-label"><span>{label}</span> <span>{score:.1%}</span></div>
+                            <div class="confidence-bar-track">
+                                <div class="confidence-bar-fill" style="width: {score*100}%; background: {color};"></div>
+                            </div>
+                            ''', unsafe_allow_html=True)
+                        st.markdown('</div>', unsafe_allow_html=True)
         
         # --- TAB 3: MODEL EVALUATION ---
         with tab3:
@@ -1832,23 +2085,31 @@ Started SIP of ₹2000/month in NPS"""
         
         # Architecture Flow
         st.subheader("🏗️ How It Works")
-        flow_cols = st.columns(5)
+        st.markdown('<div class="flow-container">', unsafe_allow_html=True)
+        flow_cols = st.columns([2, 1, 2, 1, 2, 1, 2, 1, 2])
         steps = [
-            ("📱", "1. Input", "Social media posts with user consent"),
-            ("🧹", "2. Preprocess", "Clean text, extract amounts"),
-            ("🤖", "3. NLP Engine", "Zero-shot + sentiment classification"),
-            ("📊", "4. Score", "Confidence-weighted risk calculation"),
-            ("💡", "5. Recommend", "Personalized bank products")
+            ("📱", "1. Input", "Social posts with consent"),
+            ("🧹", "2. Preprocess", "Clean & extract amounts"),
+            ("🤖", "3. NLP Engine", "Zero-shot classification"),
+            ("📊", "4. Score", "Risk & behavior calculation"),
+            ("💡", "5. Recommend", "Bank product matching")
         ]
-        for i, (col, (icon, title, desc)) in enumerate(zip(flow_cols, steps)):
-            with col:
+        
+        for i, step in enumerate(steps):
+            icon, title, desc = step
+            with flow_cols[i*2]:
                 st.markdown(f"""
-                <div class="flow-step flow-step-{i+1}">
+                <div class="flow-step flow-step-{i+1}" style="height: 100%;">
                     <div class="icon">{icon}</div>
                     <div class="title">{title}</div>
                     <div class="desc">{desc}</div>
                 </div>
                 """, unsafe_allow_html=True)
+            
+            if i < len(steps) - 1:
+                with flow_cols[i*2 + 1]:
+                    st.markdown(f'<div class="flow-arrow flow-step-{i+2}" style="height: 100%;">❯</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown("")
         st.markdown("")
@@ -1864,7 +2125,7 @@ Started SIP of ₹2000/month in NPS"""
                     <li><b>📡 Live Feed Simulation</b> — Real-time AI pipeline demo</li>
                     <li><b>🎰 Gambling/Fraud Detection</b> — Speculative behavior flagging</li>
                     <li><b>🏦 Credit Decision Engine</b> — Bank-grade loan recommendations</li>
-                    <li><b>📅 Behavioraa TimeLine</b> — Pattern detection over time</li>
+                    <li><b>📅 Behavioral TimeLine</b> — Pattern detection over time</li>
                     <li><b>Explainable AI</b> — See exactly why each score</li>
                     <li><b>PDF Reports</b> — Download professional reports</li>
                     <li><b>Model Evaluation</b> — Confusion matrix & F1 scores</li>
