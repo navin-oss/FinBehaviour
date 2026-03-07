@@ -8,3 +8,6 @@ fpdf2>=2.7.0
 matplotlib>=3.8.0
 fastapi
 uvicorn
+praw>=7.7.0
+tweepy>=4.14.0
+python-dotenv>=1.0.0

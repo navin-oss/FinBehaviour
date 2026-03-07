@@ -1,5 +1,7 @@
 import streamlit as st
 from transformers import pipeline
+import praw
+import tweepy
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -16,6 +18,10 @@ import matplotlib
 matplotlib.use('Agg')
 from fpdf import FPDF
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # --- LOGO HELPER ---
 def get_logo_base64():
@@ -29,156 +35,469 @@ def get_logo_base64():
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="FinBehavior AI", layout="wide", page_icon="🏦", initial_sidebar_state="expanded")
 
-# --- CUSTOM DARK THEME CSS ---
+# --- CUSTOM DARK THEME CSS (PREMIUM ANIMATED) ---
 st.markdown("""
 <style>
+    /* ===== GOOGLE FONTS ===== */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+    /* ===== KEYFRAME ANIMATIONS ===== */
+    @keyframes gradientShift {
+        0%   { background-position: 0% 50%; }
+        50%  { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(24px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideInLeft {
+        from { opacity: 0; transform: translateX(-30px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes glowPulse {
+        0%, 100% { box-shadow: 0 0 8px rgba(0, 210, 255, 0.3), 0 0 20px rgba(0, 210, 255, 0.1); }
+        50%      { box-shadow: 0 0 16px rgba(0, 210, 255, 0.6), 0 0 40px rgba(0, 210, 255, 0.2); }
+    }
+    @keyframes borderGlow {
+        0%, 100% { border-color: rgba(0, 210, 255, 0.3); }
+        50%      { border-color: rgba(108, 92, 231, 0.6); }
+    }
+    @keyframes floatBadge {
+        0%, 100% { transform: translateY(0px); }
+        50%      { transform: translateY(-6px); }
+    }
+    @keyframes shimmer {
+        0%   { background-position: -200% center; }
+        100% { background-position: 200% center; }
+    }
+    @keyframes pulseRing {
+        0%   { box-shadow: 0 0 0 0 rgba(0, 210, 255, 0.4); }
+        70%  { box-shadow: 0 0 0 12px rgba(0, 210, 255, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 210, 255, 0); }
+    }
+    @keyframes bounceArrow {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(6px); }
+    }
+    @keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.85); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+    @keyframes particleDrift {
+        0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+        10%  { opacity: 0.6; }
+        90%  { opacity: 0.6; }
+        100% { transform: translateY(-100vh) translateX(50px) rotate(360deg); opacity: 0; }
+    }
+
     /* ===== GLOBAL DARK THEME ===== */
     .stApp {
-        background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 40%, #24243e 100%);
+        background: linear-gradient(135deg, #0a0a1a 0%, #0f0c29 20%, #1a1a3e 50%, #24243e 80%, #0f0c29 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 20s ease infinite;
         color: #e0e0e0;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     }
-    
+
+    /* ===== PARTICLE OVERLAY ===== */
+    .stApp::before {
+        content: '';
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-image:
+            radial-gradient(1.5px 1.5px at 10% 20%, rgba(0,210,255,0.25) 50%, transparent 50%),
+            radial-gradient(1px 1px at 30% 65%, rgba(108,92,231,0.2) 50%, transparent 50%),
+            radial-gradient(1.5px 1.5px at 55% 15%, rgba(0,210,255,0.15) 50%, transparent 50%),
+            radial-gradient(1px 1px at 75% 80%, rgba(108,92,231,0.2) 50%, transparent 50%),
+            radial-gradient(1.5px 1.5px at 90% 40%, rgba(0,210,255,0.18) 50%, transparent 50%),
+            radial-gradient(1px 1px at 45% 90%, rgba(253,121,168,0.12) 50%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+        animation: gradientShift 30s ease infinite;
+    }
+
+    /* ===== CUSTOM SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0f0c29; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #00d2ff, #6c5ce7); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #00b4d8, #5a4bd1); }
+
     /* ===== LOGO & HEADER ===== */
     .logo-container {
         display: flex;
         align-items: center;
         gap: 18px;
         margin-bottom: 4px;
+        animation: fadeInUp 0.8s ease-out;
     }
     .logo-img {
-        width: 56px;
-        height: 56px;
-        border-radius: 14px;
-        box-shadow: 0 4px 20px rgba(0, 210, 255, 0.25);
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0, 210, 255, 0.35);
         flex-shrink: 0;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        animation: pulseRing 3s ease-in-out infinite;
+    }
+    .logo-img:hover {
+        transform: scale(1.08) rotate(-3deg);
+        box-shadow: 0 6px 30px rgba(0, 210, 255, 0.5);
     }
     .main-header {
-        background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 50%, #6c5ce7 100%);
+        background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 25%, #6c5ce7 50%, #00d2ff 75%, #3a7bd5 100%);
+        background-size: 200% auto;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        animation: shimmer 4s linear infinite;
         font-size: 2.8rem;
         font-weight: 900;
         letter-spacing: -1px;
         line-height: 1.1;
         margin: 0;
+        font-family: 'Inter', sans-serif !important;
     }
     .sub-header {
         color: #a0a0c0;
-        font-size: 1.1rem;
-        margin-top: 2px;
+        font-size: 1.05rem;
+        margin-top: 4px;
         font-weight: 400;
+        letter-spacing: 0.3px;
+        animation: fadeInUp 1s ease-out 0.2s both;
     }
-    
+
     /* ===== METRIC CARDS ===== */
     [data-testid="stMetric"] {
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.04);
         border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 12px;
-        padding: 16px 20px;
-        backdrop-filter: blur(8px);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 14px;
+        padding: 18px 22px;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: fadeInUp 0.6s ease-out both;
+        position: relative;
+        overflow: hidden;
+    }
+    [data-testid="stMetric"]::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0,210,255,0.06), transparent);
+        transition: left 0.6s ease;
     }
     [data-testid="stMetric"]:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 210, 255, 0.15);
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 12px 35px rgba(0, 210, 255, 0.2), 0 0 0 1px rgba(0,210,255,0.15);
+        border-color: rgba(0, 210, 255, 0.25);
+    }
+    [data-testid="stMetric"]:hover::before {
+        left: 100%;
     }
     [data-testid="stMetricLabel"] {
         color: #a0a0c0 !important;
-        font-size: 0.85rem;
+        font-size: 0.82rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     [data-testid="stMetricValue"] {
         color: #ffffff !important;
-        font-weight: 700;
+        font-weight: 800;
+        font-family: 'Inter', sans-serif !important;
     }
-    
+
     /* ===== SIDEBAR ===== */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #141428 0%, #1a1a3e 100%);
-        border-right: 1px solid rgba(255, 255, 255, 0.06);
+        background: linear-gradient(180deg, #0d0d20 0%, #141428 40%, #1a1a3e 100%);
+        border-right: 1px solid rgba(0, 210, 255, 0.08);
+        backdrop-filter: blur(20px);
     }
     [data-testid="stSidebar"] .stMarkdown h2 {
         color: #00d2ff !important;
+        font-weight: 700;
+        letter-spacing: -0.3px;
     }
-    
+
     /* ===== BUTTONS ===== */
     .stButton > button[kind="primary"] {
-        background: linear-gradient(90deg, #00d2ff, #6c5ce7) !important;
+        background: linear-gradient(135deg, #00d2ff 0%, #6c5ce7 50%, #00d2ff 100%) !important;
+        background-size: 200% 200% !important;
+        animation: gradientShift 4s ease infinite !important;
         border: none !important;
         font-weight: 700 !important;
         letter-spacing: 0.5px;
-        transition: all 0.3s ease !important;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        border-radius: 10px !important;
+        font-family: 'Inter', sans-serif !important;
+        position: relative;
+        overflow: hidden;
     }
     .stButton > button[kind="primary"]:hover {
-        transform: scale(1.02);
-        box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4) !important;
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 8px 28px rgba(0, 210, 255, 0.35), 0 0 60px rgba(108, 92, 231, 0.15) !important;
     }
-    
+    .stButton > button[kind="primary"]:active {
+        transform: translateY(0) scale(0.98);
+    }
+
     /* ===== EXPANDERS ===== */
     .streamlit-expanderHeader {
         background: rgba(255, 255, 255, 0.03) !important;
-        border-radius: 8px !important;
+        border-radius: 10px !important;
+        border: 1px solid rgba(255,255,255,0.06) !important;
+        transition: all 0.3s ease !important;
     }
-    
+    .streamlit-expanderHeader:hover {
+        background: rgba(0, 210, 255, 0.05) !important;
+        border-color: rgba(0, 210, 255, 0.15) !important;
+    }
+
     /* ===== CONSENT CARD ===== */
     .consent-card {
-        background: rgba(108, 92, 231, 0.1);
-        border: 1px solid rgba(108, 92, 231, 0.3);
-        border-radius: 16px;
-        padding: 32px;
+        background: rgba(108, 92, 231, 0.08);
+        border: 2px solid rgba(108, 92, 231, 0.25);
+        border-radius: 20px;
+        padding: 36px;
         text-align: center;
         margin: 40px auto;
-        max-width: 600px;
+        max-width: 620px;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        animation: scaleIn 0.7s cubic-bezier(0.4, 0, 0.2, 1), borderGlow 3s ease infinite;
+        box-shadow: 0 8px 40px rgba(108, 92, 231, 0.15), inset 0 1px 0 rgba(255,255,255,0.05);
+        position: relative;
+        overflow: hidden;
     }
-    .consent-card h2 { color: #00d2ff; margin-bottom: 16px; }
-    .consent-card p { color: #a0a0c0; line-height: 1.7; }
-    
+    .consent-card::before {
+        content: '';
+        position: absolute;
+        top: -2px; left: -2px; right: -2px; bottom: -2px;
+        background: linear-gradient(45deg, #00d2ff, #6c5ce7, #fd79a8, #00d2ff);
+        background-size: 400% 400%;
+        animation: gradientShift 6s linear infinite;
+        border-radius: 22px;
+        z-index: -1;
+        opacity: 0.3;
+    }
+    .consent-card h2 {
+        color: #00d2ff;
+        margin-bottom: 16px;
+        font-weight: 800;
+        font-size: 1.5rem;
+        animation: fadeInUp 0.8s ease-out 0.3s both;
+    }
+    .consent-card p {
+        color: #b0b0d0;
+        line-height: 1.8;
+        animation: fadeInUp 0.8s ease-out 0.5s both;
+    }
+
     /* ===== TABS ===== */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+        gap: 6px;
+        background: rgba(255,255,255,0.02);
+        border-radius: 12px;
+        padding: 4px;
     }
     .stTabs [data-baseweb="tab"] {
         background: rgba(255,255,255,0.03);
-        border-radius: 8px 8px 0 0;
-        padding: 10px 20px;
-        color: #a0a0c0;
+        border-radius: 10px;
+        padding: 10px 22px;
+        color: #808098;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 500;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        background: rgba(0, 210, 255, 0.06);
+        color: #c0c0e0;
     }
     .stTabs [aria-selected="true"] {
-        background: rgba(0, 210, 255, 0.1) !important;
+        background: rgba(0, 210, 255, 0.12) !important;
         color: #00d2ff !important;
         border-bottom: 2px solid #00d2ff;
+        box-shadow: 0 4px 15px rgba(0, 210, 255, 0.15);
+        font-weight: 600;
     }
-    
+
     /* ===== ARCHITECTURE FLOW ===== */
     .flow-step {
         background: rgba(255,255,255,0.04);
         border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 12px;
-        padding: 20px;
+        border-radius: 16px;
+        padding: 24px 16px;
         text-align: center;
-        transition: all 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        position: relative;
+        overflow: hidden;
+    }
+    .flow-step::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(135deg, rgba(0,210,255,0.05), transparent);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        border-radius: 16px;
     }
     .flow-step:hover {
-        border-color: #00d2ff;
+        border-color: rgba(0, 210, 255, 0.4);
+        transform: translateY(-6px) scale(1.03);
+        box-shadow: 0 16px 40px rgba(0, 210, 255, 0.15), 0 0 0 1px rgba(0,210,255,0.2);
+    }
+    .flow-step:hover::after { opacity: 1; }
+    .flow-step .icon {
+        font-size: 2.2rem;
+        margin-bottom: 10px;
+        display: inline-block;
+        transition: transform 0.3s ease;
+    }
+    .flow-step:hover .icon { transform: scale(1.2); }
+    .flow-step .title { color: #00d2ff; font-weight: 700; font-size: 0.95rem; }
+    .flow-step .desc { color: #a0a0c0; font-size: 0.8rem; margin-top: 8px; line-height: 1.4; }
+
+    /* ===== FLOW STEP STAGGER ANIMATION ===== */
+    .flow-step-1 { animation: fadeInUp 0.6s ease-out 0.1s both; }
+    .flow-step-2 { animation: fadeInUp 0.6s ease-out 0.2s both; }
+    .flow-step-3 { animation: fadeInUp 0.6s ease-out 0.3s both; }
+    .flow-step-4 { animation: fadeInUp 0.6s ease-out 0.4s both; }
+    .flow-step-5 { animation: fadeInUp 0.6s ease-out 0.5s both; }
+
+    /* ===== GLASSMORPHISM CARD ===== */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 24px;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card:hover {
+        border-color: rgba(0, 210, 255, 0.25);
+        box-shadow: 0 12px 35px rgba(0, 210, 255, 0.1);
         transform: translateY(-3px);
     }
-    .flow-step .icon { font-size: 2rem; margin-bottom: 8px; }
-    .flow-step .title { color: #00d2ff; font-weight: 700; font-size: 0.95rem; }
-    .flow-step .desc { color: #a0a0c0; font-size: 0.8rem; margin-top: 6px; }
+
+    /* ===== DECISION CARD GLOW ===== */
+    .decision-card {
+        animation: fadeInUp 0.7s ease-out, glowPulse 3s ease-in-out infinite;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+
+    /* ===== PRODUCT CARD ===== */
+    .product-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px;
+        padding: 20px;
+        text-align: center;
+        min-height: 150px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    .product-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0,210,255,0.04), transparent);
+        transition: left 0.5s ease;
+    }
+    .product-card:hover {
+        transform: translateY(-5px) scale(1.03);
+        box-shadow: 0 12px 30px rgba(0, 210, 255, 0.15);
+        border-color: rgba(0, 210, 255, 0.3);
+    }
+    .product-card:hover::before { left: 100%; }
+    .product-card .card-icon { font-size: 2rem; margin-bottom: 10px; display: inline-block; transition: transform 0.3s ease; }
+    .product-card:hover .card-icon { transform: scale(1.15) translateY(-3px); }
+
+    /* ===== COMPARISON BOXES ===== */
+    .comparison-box {
+        border-radius: 16px;
+        padding: 24px;
+        transition: all 0.35s ease;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        animation: fadeInUp 0.6s ease-out both;
+    }
+    .comparison-box:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ===== COMPLIANCE BADGES ===== */
+    .compliance-badge {
+        text-align: center;
+        padding: 14px;
+        border-radius: 14px;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        animation: fadeInUp 0.6s ease-out both;
+    }
+    .compliance-badge:hover {
+        transform: translateY(-4px) scale(1.05);
+    }
+    .compliance-badge .badge-icon {
+        font-size: 1.6rem;
+        display: inline-block;
+        animation: floatBadge 3s ease-in-out infinite;
+    }
+
+    /* ===== FEED POST CARD ===== */
+    .feed-post-card {
+        animation: slideInLeft 0.5s ease-out both;
+        transition: all 0.3s ease;
+    }
+    .feed-post-card:hover {
+        transform: translateX(4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+    .new-post-badge {
+        animation: glowPulse 2s ease-in-out infinite;
+        display: inline-block;
+    }
 
     /* ===== SUCCESS/ERROR BOXES ===== */
     .stAlert {
-        border-radius: 10px !important;
+        border-radius: 12px !important;
+        animation: fadeInUp 0.5s ease-out;
+        backdrop-filter: blur(8px);
     }
-    
+
     /* ===== PLOTLY CHARTS ===== */
     .js-plotly-plot .plotly .main-svg {
         background: transparent !important;
     }
-    
+
+    /* ===== GRADIENT DIVIDERS ===== */
+    hr {
+        border: none !important;
+        height: 1px !important;
+        background: linear-gradient(90deg, transparent, rgba(0,210,255,0.3), rgba(108,92,231,0.3), transparent) !important;
+        margin: 24px 0 !important;
+    }
+
+    /* ===== DATA TABLE ===== */
+    .stDataFrame {
+        border-radius: 12px;
+        overflow: hidden;
+        animation: fadeInUp 0.5s ease-out;
+    }
+
     /* ===== HIDE STREAMLIT BRANDING (keep sidebar toggle visible) ===== */
     footer {visibility: hidden;}
     [data-testid="stStatusWidget"] {visibility: hidden;}
-    
+
     /* ===== ENSURE SIDEBAR IS VISIBLE ===== */
     [data-testid="stSidebar"] {
         min-width: 320px !important;
@@ -186,6 +505,29 @@ st.markdown("""
     [data-testid="stSidebarCollapsedControl"] {
         display: block !important;
         visibility: visible !important;
+    }
+
+    /* ===== ANIMATED GET-STARTED CTA ===== */
+    .cta-arrow {
+        display: inline-block;
+        animation: bounceArrow 1.5s ease-in-out infinite;
+        font-size: 1.2rem;
+    }
+
+    /* ===== FEATURE LIST ITEMS ===== */
+    .feature-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 14px;
+        padding: 24px;
+        backdrop-filter: blur(12px);
+        transition: all 0.35s ease;
+        animation: fadeInUp 0.6s ease-out both;
+    }
+    .feature-card:hover {
+        border-color: rgba(0, 210, 255, 0.2);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 210, 255, 0.08);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -254,6 +596,60 @@ def load_sentiment_model():
 
 # Models are loaded lazily inside the analysis block with visual feedback
 # (removed top-level blocking call that prevented page from rendering)
+
+
+# --- REDDIT API ---
+def fetch_reddit_posts(client_id, client_secret, subreddit_name, sort_by="hot", limit=20):
+    """Fetch posts from a subreddit using PRAW (Reddit API)"""
+    try:
+        reddit = praw.Reddit(
+            client_id=client_id,
+            client_secret=client_secret,
+            user_agent="FinBehaviour AI v1.0 (by /u/FinBehaviourBot)"
+        )
+        subreddit = reddit.subreddit(subreddit_name)
+        fetch_fn = getattr(subreddit, sort_by)  # .hot(), .new(), .top()
+        posts = []
+        for post in fetch_fn(limit=limit):
+            text = post.title
+            if post.selftext and len(post.selftext.strip()) > 10:
+                text += " — " + post.selftext[:300]
+            # Skip very short or mod/sticky posts
+            if len(text.strip()) > 15:
+                posts.append(text.strip())
+        return posts, None
+    except Exception as e:
+        return [], str(e)
+
+
+# --- TWITTER/X API ---
+def fetch_twitter_posts(bearer_token, username, max_results=20):
+    """Fetch recent tweets from a public user using Twitter API v2 (Bearer Token)"""
+    try:
+        client = tweepy.Client(bearer_token=bearer_token)
+        # Look up user by username
+        clean_username = username.lstrip('@').strip()
+        user = client.get_user(username=clean_username)
+        if not user.data:
+            return [], f"User @{clean_username} not found"
+        user_id = user.data.id
+        # Fetch recent tweets (excludes retweets and replies for cleaner data)
+        tweets = client.get_users_tweets(
+            user_id,
+            max_results=min(max_results, 100),
+            tweet_fields=["created_at", "text"],
+            exclude=["retweets", "replies"]
+        )
+        if not tweets.data:
+            return [], "No tweets found for this user"
+        posts = [tweet.text for tweet in tweets.data if len(tweet.text.strip()) > 15]
+        return posts, None
+    except tweepy.TooManyRequests:
+        return [], "Rate limit exceeded. Twitter free tier allows 1 request per 15 minutes. Please wait."
+    except tweepy.Unauthorized:
+        return [], "Invalid Bearer Token. Get yours at developer.twitter.com"
+    except Exception as e:
+        return [], str(e)
 
 
 # --- SCORING LOGIC (ENHANCED) ---
@@ -460,7 +856,7 @@ def main():
     # --- SIDEBAR ---
     st.sidebar.markdown("## 📥 Input Data")
     
-    input_method = st.sidebar.radio("Input Method", ["📝 Text Input", "📁 Upload File"], horizontal=True)
+    input_method = st.sidebar.radio("Input Method", ["📝 Text Input", "📁 Upload File", "📱 Reddit Live", "🐦 Twitter/X"], horizontal=True)
     
     if input_method == "📝 Text Input":
         demo_mode = st.sidebar.checkbox("✅ Use Demo Data", value=True)
@@ -482,7 +878,7 @@ Started SIP of ₹2000/month in NPS"""
                                               placeholder="Example: Bought new laptop on EMI ₹3000/month")
         posts = [line.strip() for line in user_input.split('\n') if line.strip()] if user_input else []
     
-    else:  # File Upload
+    elif input_method == "📁 Upload File":
         uploaded_file = st.sidebar.file_uploader("Upload CSV or JSON", type=['csv', 'json'])
         posts = []
         if uploaded_file:
@@ -499,6 +895,140 @@ Started SIP of ₹2000/month in NPS"""
                         posts = [str(item) for item in data]
             st.sidebar.success(f"✅ Loaded {len(posts)} posts")
         user_input = "\n".join(posts) if posts else ""
+    
+    elif input_method == "📱 Reddit Live":
+        st.sidebar.markdown("#### 🔑 Reddit API Credentials")
+        st.sidebar.caption("Get yours free at [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps)")
+        reddit_client_id = st.sidebar.text_input("Client ID", type="password", placeholder="e.g. aB3cD4eFgH...")
+        reddit_client_secret = st.sidebar.text_input("Client Secret", type="password", placeholder="e.g. xY9zW8vU7t...")
+        
+        st.sidebar.markdown("#### 📡 Subreddit Settings")
+        subreddit_options = {
+            "IndiaInvestments": "🇮🇳 India Investments",
+            "personalfinanceindia": "💰 Personal Finance India",
+            "CreditCardsIndia": "💳 Credit Cards India",
+            "IndianStreetBets": "📈 Indian Street Bets",
+            "CryptoCurrency": "🪙 Crypto Currency",
+        }
+        selected_sub = st.sidebar.selectbox(
+            "Subreddit",
+            options=list(subreddit_options.keys()),
+            format_func=lambda x: subreddit_options[x]
+        )
+        reddit_sort = st.sidebar.selectbox("Sort By", ["hot", "new", "top"], index=0)
+        reddit_limit = st.sidebar.slider("Number of Posts", 5, 50, 15)
+        
+        posts = []
+        user_input = ""
+        
+        if reddit_client_id and reddit_client_secret:
+            if st.sidebar.button("🔄 Fetch Reddit Posts", use_container_width=True):
+                with st.sidebar:
+                    with st.spinner(f"Fetching from r/{selected_sub}..."):
+                        fetched_posts, error = fetch_reddit_posts(
+                            reddit_client_id, reddit_client_secret,
+                            selected_sub, reddit_sort, reddit_limit
+                        )
+                if error:
+                    # --- FALLBACK: load synthetic data when Reddit is unreachable ---
+                    st.sidebar.warning(f"⚠️ Reddit unavailable — loading synthetic demo data instead.\n\n_({error[:120]}...)_")
+                    try:
+                        with open("synthetic_posts.json", "r", encoding="utf-8") as f:
+                            synthetic_data = json.load(f)
+                        fetched_posts = [item['text'] if isinstance(item, dict) and 'text' in item else str(item) for item in synthetic_data[:reddit_limit]]
+                        st.session_state.reddit_posts = fetched_posts
+                        st.sidebar.success(f"✅ Loaded {len(fetched_posts)} synthetic posts as fallback")
+                    except Exception:
+                        st.sidebar.error("❌ Could not load synthetic fallback data either.")
+                elif fetched_posts:
+                    st.session_state.reddit_posts = fetched_posts
+                    st.sidebar.success(f"✅ Fetched {len(fetched_posts)} posts from r/{selected_sub}")
+                else:
+                    st.sidebar.warning("⚠️ No posts found in this subreddit.")
+        else:
+            # --- Allow fetching synthetic data even without Reddit credentials ---
+            if st.sidebar.button("📦 Load Synthetic Demo Data", use_container_width=True):
+                try:
+                    with open("synthetic_posts.json", "r", encoding="utf-8") as f:
+                        synthetic_data = json.load(f)
+                    fetched_posts = [item['text'] if isinstance(item, dict) and 'text' in item else str(item) for item in synthetic_data[:reddit_limit]]
+                    st.session_state.reddit_posts = fetched_posts
+                    st.sidebar.success(f"✅ Loaded {len(fetched_posts)} synthetic posts")
+                except Exception as e:
+                    st.sidebar.error(f"❌ Failed to load synthetic data: {e}")
+            st.sidebar.info("💡 Enter Reddit credentials above for live data, or use synthetic demo data.")
+        
+        # Use fetched posts if available
+        if 'reddit_posts' in st.session_state and st.session_state.reddit_posts:
+            posts = st.session_state.reddit_posts
+            user_input = "\n".join(posts)
+            st.sidebar.info(f"📋 {len(posts)} posts ready for analysis")
+
+    else:  # 🐦 Twitter/X
+        st.sidebar.markdown("#### 🔑 Twitter/X API Credentials")
+        st.sidebar.caption("Get your Bearer Token free at [developer.twitter.com](https://developer.twitter.com)")
+        
+        # Auto-load from .env if available
+        env_token = os.getenv("TWITTER_BEARER_TOKEN", "")
+        default_token = env_token if env_token and env_token != "your_bearer_token_here" else ""
+        
+        twitter_bearer = st.sidebar.text_input(
+            "Bearer Token", type="password",
+            value=default_token,
+            placeholder="Paste your Bearer Token here..."
+        )
+        
+        st.sidebar.markdown("#### 👤 Twitter User")
+        twitter_username = st.sidebar.text_input(
+            "Username", placeholder="e.g. @economic_times",
+            help="Enter the Twitter handle (with or without @)"
+        )
+        twitter_limit = st.sidebar.slider("Number of Tweets", 5, 100, 20, key="twitter_limit")
+        
+        posts = []
+        user_input = ""
+        
+        if twitter_bearer and twitter_username:
+            if st.sidebar.button("🔄 Fetch Tweets", use_container_width=True):
+                with st.sidebar:
+                    with st.spinner(f"Fetching tweets from @{twitter_username.lstrip('@')}..."):
+                        fetched_posts, error = fetch_twitter_posts(
+                            twitter_bearer, twitter_username, twitter_limit
+                        )
+                if error:
+                    # Fallback to synthetic data
+                    st.sidebar.warning(f"⚠️ Twitter unavailable — loading synthetic demo data.\n\n_({error[:120]}...)_")
+                    try:
+                        with open("synthetic_posts.json", "r", encoding="utf-8") as f:
+                            synthetic_data = json.load(f)
+                        fetched_posts = [item['text'] if isinstance(item, dict) and 'text' in item else str(item) for item in synthetic_data[:twitter_limit]]
+                        st.session_state.twitter_posts = fetched_posts
+                        st.sidebar.success(f"✅ Loaded {len(fetched_posts)} synthetic posts as fallback")
+                    except Exception:
+                        st.sidebar.error("❌ Could not load synthetic fallback data.")
+                elif fetched_posts:
+                    st.session_state.twitter_posts = fetched_posts
+                    st.sidebar.success(f"✅ Fetched {len(fetched_posts)} tweets from @{twitter_username.lstrip('@')}")
+                else:
+                    st.sidebar.warning("⚠️ No tweets found for this user.")
+        else:
+            # Allow synthetic data without credentials
+            if st.sidebar.button("📦 Load Synthetic Demo Data", use_container_width=True, key="twitter_demo"):
+                try:
+                    with open("synthetic_posts.json", "r", encoding="utf-8") as f:
+                        synthetic_data = json.load(f)
+                    fetched_posts = [item['text'] if isinstance(item, dict) and 'text' in item else str(item) for item in synthetic_data[:twitter_limit]]
+                    st.session_state.twitter_posts = fetched_posts
+                    st.sidebar.success(f"✅ Loaded {len(fetched_posts)} synthetic posts")
+                except Exception as e:
+                    st.sidebar.error(f"❌ Failed to load synthetic data: {e}")
+            st.sidebar.info("💡 Enter Bearer Token + Username for live tweets, or use synthetic demo data.")
+        
+        # Use fetched tweets if available
+        if 'twitter_posts' in st.session_state and st.session_state.twitter_posts:
+            posts = st.session_state.twitter_posts
+            user_input = "\n".join(posts)
+            st.sidebar.info(f"📋 {len(posts)} tweets ready for analysis")
 
     # Advanced Settings
     with st.sidebar.expander("⚙️ Advanced Settings"):
@@ -915,9 +1445,9 @@ Started SIP of ₹2000/month in NPS"""
             cmp1, cmp2 = st.columns(2)
             with cmp1:
                 st.markdown("""
-                <div style="background: rgba(255,100,100,0.08); border: 1px solid rgba(255,100,100,0.2); border-radius: 12px; padding: 20px;">
-                    <h4 style="color: #ff6b6b;">📋 Traditional (CIBIL/Bureau)</h4>
-                    <ul style="color: #a0a0c0;">
+                <div class="comparison-box" style="background: rgba(255,100,100,0.06); border: 1px solid rgba(255,100,100,0.2);">
+                    <h4 style="color: #ff6b6b; font-weight: 800; margin-top: 0;">📋 Traditional (CIBIL/Bureau)</h4>
+                    <ul style="color: #b0b0d0; line-height: 2;">
                         <li>Based on past loan repayment only</li>
                         <li>❌ <b>Rejects thin-file</b> — 400M Indians excluded</li>
                         <li>Lagging indicator (30–90 day delay)</li>
@@ -928,9 +1458,9 @@ Started SIP of ₹2000/month in NPS"""
                 """, unsafe_allow_html=True)
             with cmp2:
                 st.markdown("""
-                <div style="background: rgba(0,210,255,0.08); border: 1px solid rgba(0,210,255,0.2); border-radius: 12px; padding: 20px;">
-                    <h4 style="color: #00d2ff;">🧠 FinBehavior AI</h4>
-                    <ul style="color: #a0a0c0;">
+                <div class="comparison-box" style="background: rgba(0,210,255,0.06); border: 1px solid rgba(0,210,255,0.2);">
+                    <h4 style="color: #00d2ff; font-weight: 800; margin-top: 0;">🧠 FinBehavior AI</h4>
+                    <ul style="color: #b0b0d0; line-height: 2;">
                         <li>Based on <b>real-time behavior</b> signals</li>
                         <li>✅ <b>Includes underbanked</b> & first-time borrowers</li>
                         <li>Leading indicator — catches trends early</li>
@@ -993,15 +1523,15 @@ Started SIP of ₹2000/month in NPS"""
             
             # Decision Card
             st.markdown(f"""
-            <div style="background: rgba(255,255,255,0.04); border: 2px solid {decision_color}; border-radius: 16px; padding: 28px; margin: 10px 0;">
-                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
-                    <span style="font-size: 2.5rem;">{decision_emoji}</span>
+            <div class="decision-card" style="background: rgba(255,255,255,0.04); border: 2px solid {decision_color}; border-radius: 20px; padding: 32px; margin: 10px 0;">
+                <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 16px;">
+                    <span style="font-size: 2.8rem; filter: drop-shadow(0 0 12px {decision_color});">{decision_emoji}</span>
                     <div>
-                        <h3 style="color: {decision_color}; margin: 0;">{decision_text}</h3>
-                        <p style="color: #a0a0c0; margin: 4px 0 0 0;">Risk Score: <b style="color: white;">{int(risk_score)}/100</b> • Decision Confidence: <b style="color: white;">{decision_confidence:.0f}%</b></p>
+                        <h3 style="color: {decision_color}; margin: 0; font-weight: 800; font-size: 1.4rem;">{decision_text}</h3>
+                        <p style="color: #a0a0c0; margin: 6px 0 0 0; font-size: 0.95rem;">Risk Score: <b style="color: white; font-size: 1.1rem;">{int(risk_score)}/100</b> &nbsp;•&nbsp; Decision Confidence: <b style="color: white; font-size: 1.1rem;">{decision_confidence:.0f}%</b></p>
                     </div>
                 </div>
-                <p style="color: #e0e0e0; font-size: 1.05rem; margin: 0;">📋 {eligibility}</p>
+                <p style="color: #e0e0e0; font-size: 1.05rem; margin: 0; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06);">📋 {eligibility}</p>
             </div>
             """, unsafe_allow_html=True)
             
@@ -1011,10 +1541,10 @@ Started SIP of ₹2000/month in NPS"""
             for col, (icon, title, desc) in zip(prod_cols, products):
                 with col:
                     st.markdown(f"""
-                    <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; text-align: center; min-height: 140px;">
-                        <div style="font-size: 2rem; margin-bottom: 8px;">{icon}</div>
+                    <div class="product-card">
+                        <div class="card-icon">{icon}</div>
                         <div style="color: #00d2ff; font-weight: 700; font-size: 0.9rem;">{title}</div>
-                        <div style="color: #a0a0c0; font-size: 0.78rem; margin-top: 6px;">{desc}</div>
+                        <div style="color: #a0a0c0; font-size: 0.78rem; margin-top: 8px; line-height: 1.4;">{desc}</div>
                     </div>
                     """, unsafe_allow_html=True)
 
@@ -1205,14 +1735,14 @@ Started SIP of ₹2000/month in NPS"""
                             cat_color = cat_colors.get(category, '#aaa')
                             
                             st.markdown(f"""
-                            <div style="background: rgba(255,255,255,0.04); border-left: 3px solid {cat_color}; border-radius: 8px; padding: 16px; margin: 8px 0;">
+                            <div class="feed-post-card" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-left: 4px solid {cat_color}; border-radius: 12px; padding: 18px; margin: 10px 0;">
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                     <div>
-                                        <span style="background: rgba(0,210,255,0.15); color: #00d2ff; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">NEW POST</span>
+                                        <span class="new-post-badge" style="background: rgba(0,210,255,0.15); color: #00d2ff; padding: 3px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px;">NEW POST</span>
                                         <p style="color: #e0e0e0; font-size: 1rem; margin: 8px 0 12px 0;">“{post_text}”</p>
                                     </div>
                                 </div>
-                                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                                <div style="display: flex; gap: 20px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05);">
                                     <span style="color: #a0a0c0; font-size: 0.85rem;">Category → <b style="color: {cat_color};">{category}</b></span>
                                     <span style="color: #a0a0c0; font-size: 0.85rem;">Sentiment → <b>{sentiment}</b></span>
                                     <span style="color: #a0a0c0; font-size: 0.85rem;">Risk Impact → <b style="color: {risk_color};">{"+" if risk_impact > 0 else ""}{risk_impact}</b></span>
@@ -1264,34 +1794,34 @@ Started SIP of ₹2000/month in NPS"""
         badge1, badge2, badge3, badge4 = st.columns(4)
         with badge1:
             st.markdown("""
-            <div style="text-align:center; padding:10px; background:rgba(0,210,255,0.06); border-radius:10px; border:1px solid rgba(0,210,255,0.15);">
-                <div style="font-size:1.5rem;">🛡️</div>
-                <div style="color:#00d2ff; font-weight:600; font-size:0.85rem;">DPDP Act 2023</div>
-                <div style="color:#666; font-size:0.7rem;">Compliant</div>
+            <div class="compliance-badge" style="background:rgba(0,210,255,0.06); border:1px solid rgba(0,210,255,0.15);">
+                <div class="badge-icon">🛡️</div>
+                <div style="color:#00d2ff; font-weight:700; font-size:0.85rem; margin-top:6px;">DPDP Act 2023</div>
+                <div style="color:#808098; font-size:0.7rem; margin-top:2px;">Compliant</div>
             </div>
             """, unsafe_allow_html=True)
         with badge2:
             st.markdown("""
-            <div style="text-align:center; padding:10px; background:rgba(108,92,231,0.06); border-radius:10px; border:1px solid rgba(108,92,231,0.15);">
-                <div style="font-size:1.5rem;">🏛️</div>
-                <div style="color:#6c5ce7; font-weight:600; font-size:0.85rem;">RBI Digital Lending</div>
-                <div style="color:#666; font-size:0.7rem;">Guidelines Ready</div>
+            <div class="compliance-badge" style="background:rgba(108,92,231,0.06); border:1px solid rgba(108,92,231,0.15);">
+                <div class="badge-icon">🏛️</div>
+                <div style="color:#6c5ce7; font-weight:700; font-size:0.85rem; margin-top:6px;">RBI Digital Lending</div>
+                <div style="color:#808098; font-size:0.7rem; margin-top:2px;">Guidelines Ready</div>
             </div>
             """, unsafe_allow_html=True)
         with badge3:
             st.markdown("""
-            <div style="text-align:center; padding:10px; background:rgba(0,200,83,0.06); border-radius:10px; border:1px solid rgba(0,200,83,0.15);">
-                <div style="font-size:1.5rem;">🔐</div>
-                <div style="color:#00c853; font-weight:600; font-size:0.85rem;">ISO 27001</div>
-                <div style="color:#666; font-size:0.7rem;">Architecture Ready</div>
+            <div class="compliance-badge" style="background:rgba(0,200,83,0.06); border:1px solid rgba(0,200,83,0.15);">
+                <div class="badge-icon">🔐</div>
+                <div style="color:#00c853; font-weight:700; font-size:0.85rem; margin-top:6px;">ISO 27001</div>
+                <div style="color:#808098; font-size:0.7rem; margin-top:2px;">Architecture Ready</div>
             </div>
             """, unsafe_allow_html=True)
         with badge4:
             st.markdown("""
-            <div style="text-align:center; padding:10px; background:rgba(255,193,7,0.06); border-radius:10px; border:1px solid rgba(255,193,7,0.15);">
-                <div style="font-size:1.5rem;">🇪🇺</div>
-                <div style="color:#ffc107; font-weight:600; font-size:0.85rem;">GDPR</div>
-                <div style="color:#666; font-size:0.7rem;">By Design</div>
+            <div class="compliance-badge" style="background:rgba(255,193,7,0.06); border:1px solid rgba(255,193,7,0.15);">
+                <div class="badge-icon">🇪🇺</div>
+                <div style="color:#ffc107; font-weight:700; font-size:0.85rem; margin-top:6px;">GDPR</div>
+                <div style="color:#808098; font-size:0.7rem; margin-top:2px;">By Design</div>
             </div>
             """, unsafe_allow_html=True)
         st.caption("🔒 **Privacy & Ethics**: Consent-based analysis • No data stored • Explainable scores • Bias-audited • Human-in-the-loop oversight")
@@ -1310,10 +1840,10 @@ Started SIP of ₹2000/month in NPS"""
             ("📊", "4. Score", "Confidence-weighted risk calculation"),
             ("💡", "5. Recommend", "Personalized bank products")
         ]
-        for col, (icon, title, desc) in zip(flow_cols, steps):
+        for i, (col, (icon, title, desc)) in enumerate(zip(flow_cols, steps)):
             with col:
                 st.markdown(f"""
-                <div class="flow-step">
+                <div class="flow-step flow-step-{i+1}">
                     <div class="icon">{icon}</div>
                     <div class="title">{title}</div>
                     <div class="desc">{desc}</div>
@@ -1326,31 +1856,45 @@ Started SIP of ₹2000/month in NPS"""
         col_a, col_b = st.columns(2)
         with col_a:
             st.markdown("""
-            ### 🎯 Features
-            - **Zero-Shot NLP** — No training data needed
-            - **Sentiment-Aware Scoring** — Emotional context matters
-            - **📡 Live Feed Simulation** — Real-time AI pipeline demo
-            - **🎰 Gambling/Fraud Detection** — Speculative behavior flagging
-            - **🏦 Credit Decision Engine** — Bank-grade loan recommendations
-            - **📅 Behavioral Timeline** — Pattern detection over time
-            - **Explainable AI** — See exactly why each score
-            - **PDF Reports** — Download professional reports
-            - **Model Evaluation** — Confusion matrix & F1 scores
-            """)
+            <div class="feature-card">
+                <h3 style="color: #00d2ff; margin-top: 0; font-weight: 800;">🎯 Features</h3>
+                <ul style="color: #b0b0d0; line-height: 2.0; padding-left: 20px;">
+                    <li><b>Zero-Shot NLP</b> — No training data needed</li>
+                    <li><b>Sentiment-Aware Scoring</b> — Emotional context matters</li>
+                    <li><b>📡 Live Feed Simulation</b> — Real-time AI pipeline demo</li>
+                    <li><b>🎰 Gambling/Fraud Detection</b> — Speculative behavior flagging</li>
+                    <li><b>🏦 Credit Decision Engine</b> — Bank-grade loan recommendations</li>
+                    <li><b>📅 Behavioral Timeline</b> — Pattern detection over time</li>
+                    <li><b>Explainable AI</b> — See exactly why each score</li>
+                    <li><b>PDF Reports</b> — Download professional reports</li>
+                    <li><b>Model Evaluation</b> — Confusion matrix & F1 scores</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
         with col_b:
             st.markdown("""
-            ### 🔒 Ethics by Design
-            - ✅ Explicit **user consent** before analysis
-            - ✅ **No data storage** — ephemeral processing
-            - ✅ **Explainable scores** — full calculation visible
-            - ✅ **Bias monitoring** — model evaluation tab
-            - ✅ **GDPR & DPDP** Act 2023 compliant
-            - ✅ **Appealable** — scores can be challenged
-            - ✅ **Open model** — no black-box proprietary AI
-            """)
+            <div class="feature-card" style="animation-delay: 0.15s;">
+                <h3 style="color: #6c5ce7; margin-top: 0; font-weight: 800;">🔒 Ethics by Design</h3>
+                <ul style="color: #b0b0d0; line-height: 2.0; padding-left: 20px;">
+                    <li>✅ Explicit <b>user consent</b> before analysis</li>
+                    <li>✅ <b>No data storage</b> — ephemeral processing</li>
+                    <li>✅ <b>Explainable scores</b> — full calculation visible</li>
+                    <li>✅ <b>Bias monitoring</b> — model evaluation tab</li>
+                    <li>✅ <b>GDPR & DPDP</b> Act 2023 compliant</li>
+                    <li>✅ <b>Appealable</b> — scores can be challenged</li>
+                    <li>✅ <b>Open model</b> — no black-box proprietary AI</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
         
         st.markdown("")
-        st.info("👈 **Get Started**: Enter posts in the sidebar and click **'🚀 Analyze Behavior'**")
+        st.markdown("""
+        <div style="text-align: center; padding: 20px;">
+            <p style="color: #a0a0c0; font-size: 1.1rem;">
+                <span class="cta-arrow">👈</span>&nbsp;&nbsp;<b style="color: #00d2ff;">Get Started</b>: Enter posts in the sidebar and click <b>'🚀 Analyze Behavior'</b>
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
