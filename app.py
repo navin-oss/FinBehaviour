@@ -1864,7 +1864,7 @@ Started SIP of ₹2000/month in NPS"""
                     <li><b>📡 Live Feed Simulation</b> — Real-time AI pipeline demo</li>
                     <li><b>🎰 Gambling/Fraud Detection</b> — Speculative behavior flagging</li>
                     <li><b>🏦 Credit Decision Engine</b> — Bank-grade loan recommendations</li>
-                    <li><b>📅 Behavioral Timeline</b> — Pattern detection over time</li>
+                    <li><b>📅 Behavioraa TimeLine</b> — Pattern detection over time</li>
                     <li><b>Explainable AI</b> — See exactly why each score</li>
                     <li><b>PDF Reports</b> — Download professional reports</li>
                     <li><b>Model Evaluation</b> — Confusion matrix & F1 scores</li>
