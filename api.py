@@ -66,6 +66,26 @@ def preprocess(text: str) -> str:
 def analyze_single(text: str, include_sentiment: bool, threshold: float) -> PostResult:
     clean = preprocess(text)
     output = classifier(clean, candidate_labels=LABELS, multi_label=False)
+    
+    # Apply heuristic boosts based on explicit keywords
+    scores_dict = {k: v for k, v in zip(output['labels'], output['scores'])}
+    
+    # Rule 1: Explicit spending keywords
+    spending_keywords = ['bought', 'paid', 'purchased', 'spent', 'splurged', 'ordered', 'booked']
+    if any(word in clean for word in spending_keywords):
+        # Boost Spending significantly to ensure it exceeds threshold
+        scores_dict['Spending'] += 0.5
+        
+        # Normalize scores to sum to 1
+        total_score = sum(scores_dict.values())
+        for k in scores_dict:
+            scores_dict[k] /= total_score
+            
+        # Re-sort lists
+        sorted_items = sorted(scores_dict.items(), key=lambda x: x[1], reverse=True)
+        output['labels'] = [k for k, v in sorted_items]
+        output['scores'] = [v for k, v in sorted_items]
+    
     confidence = output['scores'][0]
     category = output['labels'][0] if confidence >= threshold else "Uncertain"
     

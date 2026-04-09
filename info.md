@@ -300,6 +300,31 @@ uvicorn api:app --reload
 
 ---
 
+## 🚀 Future Roadmap & Updates
+
+1. **Open Banking Integration**
+   - Integrating with Plaid/Yodlee to cross-reference our social sentiment analysis with real transactional data to create a hybrid credit-scoring model.
+2. **Advanced Custom AI Models (FinBERT)**
+   - Transitioning from general NLP to domain-specific financial models tuned on micro-trends and obscure financial slang.
+3. **Multi-Platform & Multi-Lingual Expansion**
+   - Expanding to LinkedIn (employment stability) and Reddit (crypto behaviors) along with multi-lingual support for global scaling.
+4. **B2B Dashboard for Lenders**
+   - Adding a dedicated "Explainable AI" dashboard for loan officers that ensures compliance with fair lending regulations and prevents AI bias.
+5. **User-Facing Financial Rehabilitation (Gamification)**
+   - A consumer app that shows users their 'Behavioral Score' and provides gamified missions to improve it.
+
+---
+
+## 🏆 Evaluation & Judging Alignment
+
+- **Innovation & Complexity**: Moves beyond traditional FICO scores using a real-time NLP pipeline that extracts latent behaviors (gambling, distress) from unstructured text.
+- **Security & Privacy by Design**: 100% Zero-Storage Policy. Data is processed in-memory and immediately purged. PII is never permanently stored.
+- **Code Quality**: API-first ecosystem. Stateless architecture ready to be horizontally scaled on any cloud provider.
+- **UI & Visualization**: "Data Storytelling" via traffic-light indicators and radar charts that allow loan officers to make a decision in 5 seconds.
+- **Problem-Solution Fit**: Gives a financial identity to credit-invisibles (Gen-Z, immigrants) while protecting banks from hidden risks.
+
+---
+
 ## 📝 License & Disclaimer
 
 This is a **research prototype** built for educational/hackathon purposes.

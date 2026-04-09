@@ -775,9 +775,9 @@ def preprocess_text(text):
 def extract_amount(text):
     """Extract monetary amounts from post"""
     patterns = [
-        r'₹\s?([\d,]+(?:\.\d+)?)\s*(crore|crores|cr|lakh|lakhs|lac|l|k)?',
-        r'(?:Rs\.?|INR)\s?([\d,]+(?:\.\d+)?)\s*(crore|crores|cr|lakh|lakhs|lac|l|k)?',
-        r'([\d,]+(?:\.\d+)?)\s*(?:rupees|rs)\s*(crore|crores|cr|lakh|lakhs|lac|l|k)?',
+        r'₹\s?((?:\d+,)*\d+(?:\.\d+)?)\s*((?:crore|crores|cr|lakh|lakhs|lac|l|k)\b)?',
+        r'(?:Rs\.?|INR)\s?((?:\d+,)*\d+(?:\.\d+)?)\s*((?:crore|crores|cr|lakh|lakhs|lac|l|k)\b)?',
+        r'((?:\d+,)*\d+(?:\.\d+)?)\s*(?:rupees|rs)\s*((?:crore|crores|cr|lakh|lakhs|lac|l|k)\b)?',
     ]
     for pattern in patterns:
         match = re.search(pattern, text, re.IGNORECASE)
@@ -1319,6 +1319,26 @@ Started SIP of ₹2000/month in NPS"""
                 
                 # Zero-shot classification
                 output = classifier_model(clean_post, candidate_labels=labels, multi_label=False)
+                
+                # Apply heuristic boosts based on explicit keywords
+                scores_dict = {k: v for k, v in zip(output['labels'], output['scores'])}
+                
+                # Rule 1: Explicit spending keywords
+                spending_keywords = ['bought', 'paid', 'purchased', 'spent', 'splurged', 'ordered', 'booked']
+                if any(word in clean_post for word in spending_keywords):
+                    # Boost Spending significantly to ensure it exceeds threshold
+                    scores_dict['Spending'] += 0.5
+                    
+                    # Normalize scores to sum to 1
+                    total_score = sum(scores_dict.values())
+                    for k in scores_dict:
+                        scores_dict[k] /= total_score
+                        
+                    # Re-sort lists
+                    sorted_items = sorted(scores_dict.items(), key=lambda x: x[1], reverse=True)
+                    output['labels'] = [k for k, v in sorted_items]
+                    output['scores'] = [v for k, v in sorted_items]
+
                 confidence = output['scores'][0]
                 category = output['labels'][0] if confidence >= confidence_threshold else "Uncertain"
                 
@@ -1334,7 +1354,7 @@ Started SIP of ₹2000/month in NPS"""
                 # Sentiment-adjusted confidence
                 adjusted_confidence = confidence
                 if include_sentiment and sentiment['label'] != "N/A":
-                    if sentiment['label'] == 'NEGATIVE' and category in ['Spending', 'Loan', 'Risk']:
+                    if sentiment['label'] == 'NEGATIVE' and category in ['Spending', 'Loan', 'Risk', 'Gambling / Speculative']:
                         adjusted_confidence = min(confidence * 1.15, 1.0)  # Boost risky items with negative sentiment
                     elif sentiment['label'] == 'POSITIVE' and category in ['Investment', 'Savings']:
                         adjusted_confidence = min(confidence * 1.1, 1.0)  # Boost stable items with positive sentiment
