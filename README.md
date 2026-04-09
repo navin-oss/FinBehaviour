@@ -8,7 +8,7 @@
 ## 📁Clean Project Structure
 
 ```
-FinBehaviorAI/
+FinBehaviour/
 ├── app.py                  # Main Streamlit application (~1000 lines)
 │                            ├── Custom CSS dark theme
 │                            ├── Consent flow
@@ -250,7 +250,7 @@ risk_score = ((base_risk - stabilizer × 0.5) / total_posts) × 50 × (1 + amoun
 
 ```bash
 # 1. Navigate to project
-cd FinBehaviorAI
+cd FinBehaviour
 
 # 2. Activate virtual environment
 venv\Scripts\activate          # Windows
@@ -263,11 +263,11 @@ pip install -r requirements.txt
 python generate_data.py
 
 # 5. Launch the Streamlit dashboard
-streamlit run app.py
-# → http://localhost:8501
+py -m streamlit run app.py
+# → http://localhost:8502 (or 8501)
 
 # 6. (Optional) Launch the REST API
-uvicorn api:app --reload
+py -m uvicorn api:app --reload
 # → http://localhost:8000/docs (Swagger UI)
 ```
 
@@ -339,7 +339,7 @@ This is a **research prototype** built for educational/hackathon purposes.
 
 ### Start the API
 ```bash
-uvicorn api:app --reload
+py -m uvicorn api:app --reload
 # → Swagger UI at http://localhost:8000/docs
 ```
 
