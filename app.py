@@ -1322,22 +1322,111 @@ Started SIP of ₹2000/month in NPS"""
                 
                 # Apply heuristic boosts based on explicit keywords
                 scores_dict = {k: v for k, v in zip(output['labels'], output['scores'])}
+                post_lower = clean_post.lower()
                 
-                # Rule 1: Explicit spending keywords
-                spending_keywords = ['bought', 'paid', 'purchased', 'spent', 'splurged', 'ordered', 'booked']
-                if any(word in clean_post for word in spending_keywords):
-                    # Boost Spending significantly to ensure it exceeds threshold
-                    scores_dict['Spending'] += 0.5
+                # NOTE: Boosts need to be LARGE (1.5+) because after normalization across 6 categories,
+                # a boost of 0.5 only yields ~0.47 confidence (below default 0.5 threshold).
+                # We need the boosted category to clearly dominate.
+                
+                # --- GAMBLING / SPECULATIVE DETECTION (highest priority — dangerous behaviors) ---
+                gambling_keywords = ['fomo', 'options trading', 'lost in trading', 'lost in options',
+                                     'betting', 'gamble', 'gambled', 'gambling', 'casino', 'satta',
+                                     'jackpot', 'lottery', 'day trading', 'speculative', 'pump and dump',
+                                     'ponzi', 'quick money', 'shiba', 'dogecoin', 'meme coin']
+                is_gambling = any(kw in post_lower for kw in gambling_keywords)
+                # Catch pattern: "lost ₹X in trading/options/crypto"
+                if re.search(r'lost.*\d+.*(?:trading|options|bet|crypto|market)', post_lower):
+                    is_gambling = True
+                if re.search(r'lost.*(?:trading|options|bet)', post_lower):
+                    is_gambling = True
+                # Catch FOMO-driven crypto buys
+                if 'crypto' in post_lower and ('fomo' in post_lower or 'because' in post_lower):
+                    is_gambling = True
+                # Catch "bought crypto because FOMO" even after preprocessing
+                if 'bought' in post_lower and 'fomo' in post_lower:
+                    is_gambling = True
+                
+                if is_gambling:
+                    scores_dict['Gambling / Speculative'] += 2.5
+                    scores_dict['Risk'] += 0.5
+                
+                # --- RISK DETECTION (risky but not pure gambling) ---
+                risk_keywords = ['risky', 'risk', 'volatile', 'crash', 'bubble', 'scam', 'fraud',
+                                 'defaulted', 'overdue', 'penalty', 'bounced', 'cheque bounced',
+                                 'bankruptcy', 'debt trap', 'overleveraged', 'margin call',
+                                 'high interest', 'loan shark', 'emi missed', 'missed emi']
+                if any(kw in post_lower for kw in risk_keywords) and not is_gambling:
+                    scores_dict['Risk'] += 2.0
+                
+                # --- LOAN DETECTION ---
+                loan_keywords = ['loan', 'borrowed', 'borrow', 'lending', 'lend',
+                                 'personal loan', 'home loan', 'car loan', 'education loan',
+                                 'outstanding', 'installment', 'repayment',
+                                 'mortgage', 'financed', 'financing', 'credit line', 'overdraft']
+                has_loan = any(kw in post_lower for kw in loan_keywords)
+                # Also detect EMI (but not in gambling context)
+                if 'emi' in post_lower and not is_gambling:
+                    has_loan = True
+                # Detect "credit card bill" as loan-related
+                if re.search(r'credit\s*card\s*bill', post_lower):
+                    has_loan = True
                     
-                    # Normalize scores to sum to 1
-                    total_score = sum(scores_dict.values())
+                if has_loan:
+                    scores_dict['Loan'] += 1.8
+                    # Exception: "paid credit card bill on time" is responsible → also strong Savings signal
+                    if ('paid' in post_lower or 'cleared' in post_lower) and ('on time' in post_lower or 'timely' in post_lower or 'before due' in post_lower):
+                        scores_dict['Savings'] += 2.0  # Discipline = financial health — dominant signal
+                        scores_dict['Loan'] -= 0.5  # Less risky since paid on time
+                
+                # --- INVESTMENT DETECTION ---
+                investment_keywords = ['invested', 'invest', 'investment', 'mutual fund', 'mutual funds',
+                                       'sip', 'nps', 'nifty', 'sensex', 'portfolio', 'stocks', 'shares',
+                                       'equity', 'index fund', 'etf', 'ppf', 'elss', 'blue chip',
+                                       'long term', 'wealth creation', 'compounding',
+                                       'dividend', 'returns', 'systematic investment']
+                if any(kw in post_lower for kw in investment_keywords):
+                    scores_dict['Investment'] += 2.0
+                    # SIP/NPS are strong disciplined investment signals
+                    if 'sip' in post_lower or 'nps' in post_lower or 'systematic' in post_lower:
+                        scores_dict['Investment'] += 0.5
+                
+                # --- SAVINGS DETECTION ---
+                savings_keywords = ['saved', 'saving', 'savings', 'emergency fund', 'rainy day',
+                                    'fixed deposit', 'fd', 'recurring deposit', 'rd', 'piggy bank',
+                                    'set aside', 'put away', 'stashed', 'frugal', 'budget', 'budgeting',
+                                    'cut expenses', 'saved up']
+                if any(kw in post_lower for kw in savings_keywords):
+                    scores_dict['Savings'] += 2.0
+                
+                # --- SPENDING DETECTION (general purchases, lifestyle expenses) ---
+                spending_keywords = ['bought', 'purchased', 'spent', 'splurged', 'ordered',
+                                     'booked', 'shopping', 'trip', 'vacation', 'holiday',
+                                     'luxury', 'expensive', 'upgrade', 'new phone', 'new car',
+                                     'iphone', 'gadget', 'travel', 'restaurant', 'dining']
+                is_spending = any(kw in post_lower for kw in spending_keywords)
+                # Rent/transfer as spending
+                if re.search(r'(?:rent|transferred|transfer)', post_lower):
+                    is_spending = True
+                # "paid" alone without loan/savings context → Spending
+                if 'paid' in post_lower and not any(kw in post_lower for kw in ['on time', 'timely', 'loan', 'credit card bill']):
+                    is_spending = True
+                
+                if is_spending and not is_gambling:
+                    scores_dict['Spending'] += 1.8
+                    # Luxury spending gets extra weight
+                    if any(kw in post_lower for kw in ['luxury', 'splurged', 'dubai', 'vacation', 'trip']):
+                        scores_dict['Spending'] += 0.5
+                
+                # --- Normalize scores back to sum to 1 ---
+                total_score = sum(scores_dict.values())
+                if total_score > 0:
                     for k in scores_dict:
                         scores_dict[k] /= total_score
-                        
-                    # Re-sort lists
-                    sorted_items = sorted(scores_dict.items(), key=lambda x: x[1], reverse=True)
-                    output['labels'] = [k for k, v in sorted_items]
-                    output['scores'] = [v for k, v in sorted_items]
+                
+                # Re-sort lists based on boosted scores
+                sorted_items = sorted(scores_dict.items(), key=lambda x: x[1], reverse=True)
+                output['labels'] = [k for k, v in sorted_items]
+                output['scores'] = [v for k, v in sorted_items]
 
                 confidence = output['scores'][0]
                 category = output['labels'][0] if confidence >= confidence_threshold else "Uncertain"
