@@ -759,6 +759,8 @@ if 'live_feed_posts' not in st.session_state:
     st.session_state.live_feed_posts = []
 if 'live_feed_risk' not in st.session_state:
     st.session_state.live_feed_risk = 0
+if 'flagged_posts' not in st.session_state:
+    st.session_state.flagged_posts = set()
 
 
 # --- PREPROCESSING ---
@@ -1245,8 +1247,8 @@ Started SIP of ₹2000/month in NPS"""
 
     # Advanced Settings
     with st.sidebar.expander("⚙️ Advanced Settings"):
-        confidence_threshold = st.slider("Confidence Threshold", 0.3, 0.9, 0.5, 0.05,
-                                         help="Posts below this confidence → 'Uncertain'")
+        confidence_threshold = st.slider("Confidence Threshold", 0.2, 0.9, 0.35, 0.05,
+                                         help="Posts below this confidence → 'Uncertain'. Recommended: 0.35 for 6-label zero-shot classifier.")
         include_sentiment = st.checkbox("🎭 Include Sentiment Analysis", value=True,
                                         help="Adds emotional context to risk scoring")
 
@@ -1949,9 +1951,25 @@ Started SIP of ₹2000/month in NPS"""
                     # --- HUMAN-IN-THE-LOOP FLAGGING (Add-On #2) ---
                     if row['Category'] in ['Risk', 'Gambling / Speculative'] or row['Confidence'] < 0.6:
                         flag_key = f"flag_{idx}_{row['Post'][:20]}"
-                        if st.button("🚩 Flag for Manual Review", key=flag_key):
-                            st.success("✅ Flagged for Loan Officer Review — alert sent to CRM")
-                            st.caption("_In production, this triggers an alert in the bank's Case Management System_")
+                        post_id = f"{idx}_{row['Post'][:30]}"
+                        already_flagged = post_id in st.session_state.flagged_posts
+                        
+                        if already_flagged:
+                            st.warning("🚩 Already flagged — risk score was increased by +10")
+                        else:
+                            if st.button("🚩 Flag for Manual Review", key=flag_key):
+                                # Track this post as flagged
+                                st.session_state.flagged_posts.add(post_id)
+                                
+                                # Increase risk score by 10 points (capped at 100)
+                                RISK_PENALTY_PER_FLAG = 10
+                                current_risk = st.session_state.analysis_scores['risk_score']
+                                new_risk = min(current_risk + RISK_PENALTY_PER_FLAG, 100)
+                                st.session_state.analysis_scores['risk_score'] = new_risk
+                                
+                                st.success(f"✅ Flagged for Loan Officer Review — Risk score increased: {int(current_risk)} → {int(new_risk)} (+{RISK_PENALTY_PER_FLAG})")
+                                st.caption("_In production, this triggers an alert in the bank's Case Management System_")
+                                st.rerun()
                     
                     if row['All_Scores']:
                         st.markdown('<div class="confidence-bar-container">', unsafe_allow_html=True)
