@@ -740,6 +740,497 @@ st.markdown("""
     .slide-up-card-2 { animation-delay: 0.95s; }
     .slide-up-card-3 { animation-delay: 1.1s; }
     .slide-up-card-4 { animation-delay: 1.25s; }
+
+    /* ============================================================
+       MOBILE RESPONSIVE DESIGN
+       ============================================================ */
+
+    /* --- TABLET BREAKPOINT (≤ 768px) --- */
+    @media screen and (max-width: 768px) {
+        /* Sidebar — allow it to collapse properly on mobile */
+        [data-testid="stSidebar"] {
+            min-width: 260px !important;
+            max-width: 85vw !important;
+        }
+
+        /* Header / Logo shrink */
+        .logo-container {
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            text-align: center;
+        }
+        .logo-img {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+        }
+        .main-header {
+            font-size: 2rem !important;
+            letter-spacing: -0.5px;
+            text-align: center;
+        }
+        .sub-header-typing, .sub-header {
+            font-size: 0.88rem !important;
+            white-space: normal !important;
+            border-right: none !important;
+            animation: fadeInUp 0.8s ease-out 0.2s both !important;
+            max-width: 100% !important;
+            text-align: center;
+        }
+
+        /* Consent Card */
+        .consent-card {
+            padding: 24px 18px;
+            margin: 24px auto;
+            max-width: 95%;
+            border-radius: 16px;
+        }
+        .consent-card h2 {
+            font-size: 1.25rem;
+        }
+        .consent-card p {
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Metric Cards — stack nicely */
+        [data-testid="stMetric"] {
+            padding: 14px 16px;
+            border-radius: 12px;
+        }
+
+        /* Flow Steps — stack vertically on tablet */
+        .flow-container {
+            flex-direction: column !important;
+            gap: 10px !important;
+        }
+        .flow-arrow {
+            transform: rotate(90deg) !important;
+            padding: 4px 0 !important;
+            font-size: 1.2rem !important;
+        }
+        .flow-step {
+            padding: 18px 14px;
+        }
+        .flow-step .icon {
+            font-size: 1.8rem;
+        }
+        .flow-step .title {
+            font-size: 0.88rem;
+        }
+        .flow-step .desc {
+            font-size: 0.75rem;
+        }
+
+        /* Risk Gauge — smaller on tablet */
+        .risk-gauge {
+            width: 150px !important;
+            height: 150px !important;
+        }
+        .risk-gauge-inner {
+            width: 108px !important;
+            height: 108px !important;
+        }
+        .risk-gauge-score {
+            font-size: 2rem !important;
+        }
+
+        /* Decision Card */
+        .decision-card {
+            padding: 22px 16px !important;
+        }
+        .decision-card div[style*="display: flex"] {
+            flex-wrap: wrap;
+            gap: 14px !important;
+        }
+
+        /* Product Cards */
+        .product-card {
+            padding: 16px;
+            min-height: 120px;
+        }
+        .product-card .card-icon {
+            font-size: 1.6rem;
+        }
+
+        /* Comparison Boxes */
+        .comparison-box {
+            padding: 18px;
+            border-radius: 14px;
+        }
+        .comparison-box h4 {
+            font-size: 1rem !important;
+        }
+        .comparison-box ul {
+            font-size: 0.85rem;
+            padding-left: 18px !important;
+        }
+
+        /* Compliance Badges */
+        .compliance-badge {
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .compliance-badge .badge-icon {
+            font-size: 1.3rem;
+        }
+
+        /* Tabs */
+        .stTabs [data-baseweb="tab"] {
+            padding: 8px 14px;
+            font-size: 0.85rem;
+        }
+
+        /* Live Feed */
+        .feed-post-card {
+            padding: 14px !important;
+        }
+        .feed-post-card p {
+            font-size: 0.9rem !important;
+        }
+
+        /* Glass Card */
+        .glass-card {
+            padding: 18px;
+        }
+
+        /* Feature Card */
+        .feature-card {
+            padding: 18px;
+        }
+        .feature-card h3 {
+            font-size: 1.1rem !important;
+        }
+        .feature-card ul {
+            font-size: 0.88rem;
+        }
+
+        /* AI Processing Stage */
+        .ai-stage {
+            padding: 10px 14px;
+            gap: 10px;
+        }
+        .ai-stage-text {
+            font-size: 0.85rem;
+        }
+
+        /* CTA arrow */
+        .cta-arrow {
+            font-size: 1rem;
+        }
+    }
+
+    /* --- MOBILE BREAKPOINT (≤ 480px) --- */
+    @media screen and (max-width: 480px) {
+        /* Sidebar — full width overlay on small mobile */
+        [data-testid="stSidebar"] {
+            min-width: 100vw !important;
+            max-width: 100vw !important;
+        }
+
+        /* Header */
+        .logo-container {
+            gap: 8px;
+            flex-direction: column;
+            align-items: center;
+        }
+        .logo-img {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+        }
+        .main-header {
+            font-size: 1.6rem !important;
+            text-align: center;
+        }
+        .sub-header-typing, .sub-header {
+            font-size: 0.78rem !important;
+            text-align: center;
+        }
+
+        /* Consent Card — tighter on phone */
+        .consent-card {
+            padding: 20px 14px;
+            margin: 16px 4px;
+            max-width: 100%;
+            border-radius: 14px;
+        }
+        .consent-card h2 {
+            font-size: 1.1rem;
+        }
+        .consent-card p {
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+
+        /* Metric Cards */
+        [data-testid="stMetric"] {
+            padding: 10px 12px;
+            border-radius: 10px;
+        }
+        [data-testid="stMetricLabel"] {
+            font-size: 0.7rem !important;
+        }
+
+        /* Risk Gauge */
+        .risk-gauge {
+            width: 120px !important;
+            height: 120px !important;
+        }
+        .risk-gauge-inner {
+            width: 86px !important;
+            height: 86px !important;
+        }
+        .risk-gauge-score {
+            font-size: 1.6rem !important;
+        }
+        .risk-gauge-label {
+            font-size: 0.6rem !important;
+            letter-spacing: 1px;
+        }
+        .risk-gauge-level {
+            font-size: 0.72rem;
+            padding: 3px 12px;
+        }
+
+        /* Flow Steps */
+        .flow-step {
+            padding: 14px 10px;
+            border-radius: 12px;
+        }
+        .flow-step .icon {
+            font-size: 1.5rem;
+            margin-bottom: 6px;
+        }
+        .flow-step .title {
+            font-size: 0.82rem;
+        }
+        .flow-step .desc {
+            font-size: 0.7rem;
+            margin-top: 4px;
+        }
+
+        /* Decision Card */
+        .decision-card {
+            padding: 16px 12px !important;
+            border-radius: 14px !important;
+        }
+        .decision-card span[style*="font-size: 2.8rem"] {
+            font-size: 2rem !important;
+        }
+        .decision-card h3 {
+            font-size: 1.1rem !important;
+        }
+        .decision-card p {
+            font-size: 0.82rem !important;
+        }
+
+        /* Product Cards — full width stack */
+        .product-card {
+            padding: 14px;
+            min-height: auto;
+            border-radius: 12px;
+        }
+        .product-card .card-icon {
+            font-size: 1.4rem;
+        }
+
+        /* Comparison Boxes */
+        .comparison-box {
+            padding: 14px;
+            border-radius: 12px;
+        }
+        .comparison-box h4 {
+            font-size: 0.92rem !important;
+        }
+        .comparison-box ul {
+            font-size: 0.8rem;
+            line-height: 1.7 !important;
+        }
+
+        /* Compliance Badges */
+        .compliance-badge {
+            padding: 8px;
+            border-radius: 8px;
+        }
+        .compliance-badge .badge-icon {
+            font-size: 1.1rem;
+        }
+        .compliance-badge div[style*="font-weight:700"] {
+            font-size: 0.72rem !important;
+        }
+
+        /* Tabs — scroll horizontally */
+        .stTabs [data-baseweb="tab-list"] {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            gap: 4px;
+            padding: 3px;
+            flex-wrap: nowrap;
+        }
+        .stTabs [data-baseweb="tab"] {
+            padding: 7px 10px;
+            font-size: 0.78rem;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* Confidence Bars */
+        .confidence-bar-label {
+            font-size: 0.72rem !important;
+        }
+        .confidence-bar-track {
+            height: 6px;
+        }
+
+        /* Live Feed Cards */
+        .feed-post-card {
+            padding: 12px 10px !important;
+            border-radius: 10px !important;
+        }
+        .feed-post-card p {
+            font-size: 0.82rem !important;
+        }
+        .feed-post-card span[style*="font-size: 0.85rem"] {
+            font-size: 0.75rem !important;
+        }
+        .new-post-badge {
+            font-size: 0.6rem !important;
+            padding: 2px 8px !important;
+        }
+
+        /* Feature Card */
+        .feature-card {
+            padding: 16px;
+            border-radius: 12px;
+        }
+        .feature-card h3 {
+            font-size: 1rem !important;
+        }
+        .feature-card ul {
+            font-size: 0.82rem;
+            padding-left: 16px !important;
+            line-height: 1.8 !important;
+        }
+
+        /* Glass Card */
+        .glass-card {
+            padding: 14px;
+            border-radius: 12px;
+        }
+
+        /* AI Stage */
+        .ai-stage {
+            padding: 8px 12px;
+            gap: 8px;
+            border-radius: 10px;
+        }
+        .ai-stage-icon {
+            font-size: 1.2rem;
+        }
+        .ai-stage-text {
+            font-size: 0.78rem;
+        }
+
+        /* CTA */
+        .cta-arrow {
+            font-size: 0.9rem;
+        }
+
+        /* Buttons — full width & touch friendly */
+        .stButton > button {
+            min-height: 44px !important;
+            font-size: 0.9rem !important;
+        }
+
+        /* Dividers */
+        hr {
+            margin: 16px 0 !important;
+        }
+
+        /* Disable heavy hover transforms on touch devices */
+        [data-testid="stMetric"]:hover,
+        .flow-step:hover,
+        .product-card:hover,
+        .compliance-badge:hover,
+        .comparison-box:hover,
+        .glass-card:hover,
+        .feature-card:hover {
+            transform: none !important;
+        }
+    }
+
+    /* --- SMALL MOBILE BREAKPOINT (≤ 360px) --- */
+    @media screen and (max-width: 360px) {
+        .main-header {
+            font-size: 1.35rem !important;
+        }
+        .sub-header-typing, .sub-header {
+            font-size: 0.72rem !important;
+        }
+        .logo-img {
+            width: 36px;
+            height: 36px;
+        }
+        .consent-card {
+            padding: 16px 10px;
+        }
+        .consent-card h2 {
+            font-size: 1rem;
+        }
+        .risk-gauge {
+            width: 100px !important;
+            height: 100px !important;
+        }
+        .risk-gauge-inner {
+            width: 72px !important;
+            height: 72px !important;
+        }
+        .risk-gauge-score {
+            font-size: 1.3rem !important;
+        }
+        .stTabs [data-baseweb="tab"] {
+            padding: 6px 8px;
+            font-size: 0.72rem;
+        }
+    }
+
+    /* --- TOUCH DEVICE OPTIMIZATIONS --- */
+    @media (hover: none) and (pointer: coarse) {
+        /* Remove hover animations on touch devices for perf */
+        [data-testid="stMetric"]:hover,
+        .flow-step:hover,
+        .product-card:hover,
+        .glass-card:hover,
+        .feature-card:hover,
+        .compliance-badge:hover,
+        .comparison-box:hover,
+        .feed-post-card:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Ensure large enough touch targets */
+        .stButton > button,
+        .stTabs [data-baseweb="tab"],
+        [data-testid="stMetric"] {
+            min-height: 44px;
+        }
+
+        /* Disable particle overlay for performance */
+        .stApp::before {
+            display: none;
+        }
+
+        /* Reduce animation intensity */
+        .main-header {
+            animation: shimmer 6s linear infinite !important;
+        }
+        .flow-step {
+            animation: fadeInUp 0.6s ease-out both !important;
+        }
+    }
 </style>
 """, unsafe_allow_html=True)
 
